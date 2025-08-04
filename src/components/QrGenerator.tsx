@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Download, Palette, Settings, Wifi, Phone, Mail, User, Calendar, MessageSquare } from 'lucide-react';
+import { Download, Palette, Settings, Wifi, Phone, Mail, User, Calendar, MessageSquare, ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 type QRType = 'text' | 'url' | 'email' | 'phone' | 'sms' | 'wifi' | 'vcard' | 'event';
@@ -48,7 +48,11 @@ interface QRStyle {
   level: 'L' | 'M' | 'Q' | 'H';
 }
 
-const QrGenerator = () => {
+interface QrGeneratorProps {
+  onBack?: () => void;
+}
+
+const QrGenerator = ({ onBack }: QrGeneratorProps) => {
   const [qrType, setQrType] = useState<QRType>('url');
   const [qrData, setQrData] = useState<QRData>({
     text: '',
@@ -160,13 +164,25 @@ const QrGenerator = () => {
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-8">
       {/* Header */}
-      <div className="text-center space-y-4 animate-fade-in">
-        <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-          Generate QR Code
-        </h1>
-        <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-          Create beautiful, customizable QR codes for any purpose. Choose your content type and style.
-        </p>
+      <div className="space-y-4 animate-fade-in">
+        {onBack && (
+          <Button
+            variant="ghost"
+            onClick={onBack}
+            className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to Home
+          </Button>
+        )}
+        <div className="text-center space-y-4">
+          <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+            Generate QR Code
+          </h1>
+          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+            Create beautiful, customizable QR codes for any purpose. Choose your content type and style.
+          </p>
+        </div>
       </div>
 
       <div className="grid lg:grid-cols-2 gap-8">
