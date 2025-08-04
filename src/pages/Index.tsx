@@ -8,7 +8,7 @@ const Index = () => {
   const [showGenerator, setShowGenerator] = useState(false);
 
   if (showGenerator) {
-    return <QrGenerator onBack={() => setShowGenerator(false)} />;
+    return <QrGenerator />;
   }
 
   return (
