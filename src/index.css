@@ -211,7 +211,7 @@ Professional typography, enhanced visual hierarchy & production-ready design tok
   }
 
   .btn-premium {
-    @apply bg-gradient-hero text-white shadow-lg hover:shadow-xl hover:scale-[1.02] 
+    @apply bg-gradient-to-r from-primary to-primary-hover text-white shadow-lg hover:shadow-xl hover:scale-[1.02] 
            active:scale-[0.98] transition-all duration-200 rounded-xl px-8 py-4 
            font-semibold focus:outline-none focus:ring-2 focus:ring-primary/20 focus:ring-offset-2;
   }
