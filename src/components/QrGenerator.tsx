@@ -12,9 +12,11 @@ import {
   MessageSquare, Copy, Share2, Sparkles, Zap, Globe, FileText, Link, Users, 
   Video, Camera, Music, Briefcase, MapPin, Clock, Menu, Store, Ticket, Gift,
   Facebook, Instagram, Twitter, Youtube, Linkedin, Github, Chrome, Smartphone,
-  Receipt, Car, Home, CreditCard, FileImage, HelpCircle, QrCode
+  Receipt, Car, Home, CreditCard, FileImage, HelpCircle, QrCode, Eye, EyeOff,
+  Lock, ImageIcon, CheckCircle
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { Switch } from '@/components/ui/switch';
 
 type QRType = 'text' | 'url' | 'email' | 'phone' | 'sms' | 'wifi' | 'vcard' | 'event' | 
              'pdf' | 'links' | 'business' | 'video' | 'images' | 'social' | 'whatsapp' | 
@@ -193,6 +195,11 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
     level: 'M'
   });
 
+  const [hasPassword, setHasPassword] = useState(false);
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const qrCodeRef = useRef<HTMLDivElement>(null);
+
   const qrRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -221,6 +228,62 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
     { type: 'location' as QRType, label: 'Location', icon: MapPin, color: 'text-red-600', description: 'Share GPS coordinates' },
     { type: 'crypto' as QRType, label: 'Crypto', icon: CreditCard, color: 'text-yellow-600', description: 'Cryptocurrency payment' }
   ];
+
+  // Auto-scroll to QR preview when type is selected
+  const scrollToQRCode = () => {
+    if (qrCodeRef.current) {
+      qrCodeRef.current.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'center' 
+      });
+    }
+  };
+
+  // Handle QR type selection with auto-scroll
+  const handleQRTypeSelect = (type: QRType) => {
+    setQrType(type);
+    // Delay scroll to ensure the content form is rendered
+    setTimeout(() => {
+      scrollToQRCode();
+    }, 100);
+  };
+
+  // Get current location for location QR type
+  const getCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      toast({
+        title: "Geolocation not supported",
+        description: "Your browser doesn't support geolocation.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        setQrData({
+          ...qrData,
+          location: {
+            ...qrData.location,
+            latitude: latitude.toString(),
+            longitude: longitude.toString(),
+          }
+        });
+        toast({
+          title: "Location detected!",
+          description: "Your current location has been added to the QR code.",
+        });
+      },
+      (error) => {
+        toast({
+          title: "Location access denied",
+          description: "Please allow location access or enter coordinates manually.",
+          variant: "destructive",
+        });
+      }
+    );
+  };
 
   // Step indicator component
   const StepIndicator = () => (
@@ -307,6 +370,21 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
     }
   };
 
+  // Generate protected QR value with password if enabled
+  const getProtectedQRValue = (): string => {
+    const baseValue = generateQRValue();
+    if (hasPassword && password) {
+      // Create a simple protection page URL with encoded data
+      const encodedData = btoa(JSON.stringify({
+        content: baseValue,
+        password: password,
+        type: qrType
+      }));
+      return `${window.location.origin}#protected=${encodedData}`;
+    }
+    return baseValue;
+  };
+
   const downloadQR = async (format: 'png' | 'svg') => {
     if (!qrRef.current) return;
 
@@ -344,7 +422,7 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
   };
 
   const copyQRValue = async () => {
-    const value = generateQRValue();
+    const value = getProtectedQRValue();
     if (!value) return;
 
     try {
@@ -375,7 +453,7 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
     try {
       await navigator.share({
         title: 'QrCraft - QR Code',
-        text: `Check out this QR code I created with QrCraft: ${generateQRValue()}`,
+        text: `Check out this QR code I created with QrCraft: ${getProtectedQRValue()}`,
         url: window.location.href,
       });
     } catch (error) {
@@ -745,6 +823,343 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
               </div>
             )}
 
+            {qrType === 'event' && (
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="eventTitle" className="text-sm font-medium">Event Title</Label>
+                  <Input
+                    id="eventTitle"
+                    placeholder="Birthday Party"
+                    value={qrData.event.title}
+                    onChange={(e) => setQrData({ 
+                      ...qrData, 
+                      event: { ...qrData.event, title: e.target.value }
+                    })}
+                    className="input-elevated mt-2"
+                  />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="eventStart" className="text-sm font-medium">Start Date & Time</Label>
+                    <Input
+                      id="eventStart"
+                      type="datetime-local"
+                      value={qrData.event.start}
+                      onChange={(e) => setQrData({ 
+                        ...qrData, 
+                        event: { ...qrData.event, start: e.target.value }
+                      })}
+                      className="input-elevated mt-2"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="eventEnd" className="text-sm font-medium">End Date & Time</Label>
+                    <Input
+                      id="eventEnd"
+                      type="datetime-local"
+                      value={qrData.event.end}
+                      onChange={(e) => setQrData({ 
+                        ...qrData, 
+                        event: { ...qrData.event, end: e.target.value }
+                      })}
+                      className="input-elevated mt-2"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="eventLocation" className="text-sm font-medium">Location</Label>
+                  <Input
+                    id="eventLocation"
+                    placeholder="123 Main St, City, State"
+                    value={qrData.event.location}
+                    onChange={(e) => setQrData({ 
+                      ...qrData, 
+                      event: { ...qrData.event, location: e.target.value }
+                    })}
+                    className="input-elevated mt-2"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="eventDescription" className="text-sm font-medium">Description</Label>
+                  <Textarea
+                    id="eventDescription"
+                    placeholder="Event details and description..."
+                    value={qrData.event.description}
+                    onChange={(e) => setQrData({ 
+                      ...qrData, 
+                      event: { ...qrData.event, description: e.target.value }
+                    })}
+                    className="input-elevated mt-2"
+                  />
+                </div>
+              </div>
+            )}
+
+            {qrType === 'location' && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="latitude" className="text-sm font-medium">Latitude</Label>
+                    <Input
+                      id="latitude"
+                      type="number"
+                      step="any"
+                      placeholder="40.7128"
+                      value={qrData.location.latitude}
+                      onChange={(e) => setQrData({ 
+                        ...qrData, 
+                        location: { ...qrData.location, latitude: e.target.value }
+                      })}
+                      className="input-elevated mt-2"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="longitude" className="text-sm font-medium">Longitude</Label>
+                    <Input
+                      id="longitude"
+                      type="number"
+                      step="any"
+                      placeholder="-74.0060"
+                      value={qrData.location.longitude}
+                      onChange={(e) => setQrData({ 
+                        ...qrData, 
+                        location: { ...qrData.location, longitude: e.target.value }
+                      })}
+                      className="input-elevated mt-2"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="locationAddress" className="text-sm font-medium">Address/Label</Label>
+                  <Input
+                    id="locationAddress"
+                    placeholder="Central Park, New York"
+                    value={qrData.location.address}
+                    onChange={(e) => setQrData({ 
+                      ...qrData, 
+                      location: { ...qrData.location, address: e.target.value }
+                    })}
+                    className="input-elevated mt-2"
+                  />
+                </div>
+                <Button 
+                  onClick={getCurrentLocation}
+                  variant="outline" 
+                  className="w-full gap-2"
+                  type="button"
+                >
+                  <MapPin className="w-4 h-4" />
+                  Use Current Location
+                </Button>
+                {qrData.location.latitude && qrData.location.longitude && (
+                  <div className="p-4 bg-muted/50 rounded-lg">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <CheckCircle className="w-4 h-4 text-green-500" />
+                      <span>
+                        Location: {qrData.location.latitude}, {qrData.location.longitude}
+                      </span>
+                    </div>
+                    <a 
+                      href={`https://maps.google.com/?q=${qrData.location.latitude},${qrData.location.longitude}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline text-sm"
+                    >
+                      View on Google Maps
+                    </a>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {qrType === 'crypto' && (
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="cryptoCurrency" className="text-sm font-medium">Cryptocurrency</Label>
+                  <Select 
+                    value={qrData.crypto.currency} 
+                    onValueChange={(value) => 
+                      setQrData({ 
+                        ...qrData, 
+                        crypto: { ...qrData.crypto, currency: value }
+                      })
+                    }
+                  >
+                    <SelectTrigger className="input-elevated mt-2">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="BTC">Bitcoin (BTC)</SelectItem>
+                      <SelectItem value="ETH">Ethereum (ETH)</SelectItem>
+                      <SelectItem value="LTC">Litecoin (LTC)</SelectItem>
+                      <SelectItem value="BCH">Bitcoin Cash (BCH)</SelectItem>
+                      <SelectItem value="DOGE">Dogecoin (DOGE)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="cryptoAddress" className="text-sm font-medium">Wallet Address</Label>
+                  <Input
+                    id="cryptoAddress"
+                    placeholder="1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa"
+                    value={qrData.crypto.address}
+                    onChange={(e) => setQrData({ 
+                      ...qrData, 
+                      crypto: { ...qrData.crypto, address: e.target.value }
+                    })}
+                    className="input-elevated mt-2 font-mono text-xs"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="cryptoAmount" className="text-sm font-medium">Amount (Optional)</Label>
+                  <Input
+                    id="cryptoAmount"
+                    type="number"
+                    step="any"
+                    placeholder="0.001"
+                    value={qrData.crypto.amount}
+                    onChange={(e) => setQrData({ 
+                      ...qrData, 
+                      crypto: { ...qrData.crypto, amount: e.target.value }
+                    })}
+                    className="input-elevated mt-2"
+                  />
+                </div>
+              </div>
+            )}
+
+            {qrType === 'business' && (
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="businessName" className="text-sm font-medium">Business Name</Label>
+                  <Input
+                    id="businessName"
+                    placeholder="Acme Corporation"
+                    value={qrData.business.name}
+                    onChange={(e) => setQrData({ 
+                      ...qrData, 
+                      business: { ...qrData.business, name: e.target.value }
+                    })}
+                    className="input-elevated mt-2"
+                  />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="businessPhone" className="text-sm font-medium">Phone</Label>
+                    <Input
+                      id="businessPhone"
+                      type="tel"
+                      placeholder="+1234567890"
+                      value={qrData.business.phone}
+                      onChange={(e) => setQrData({ 
+                        ...qrData, 
+                        business: { ...qrData.business, phone: e.target.value }
+                      })}
+                      className="input-elevated mt-2"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="businessEmail" className="text-sm font-medium">Email</Label>
+                    <Input
+                      id="businessEmail"
+                      type="email"
+                      placeholder="contact@acme.com"
+                      value={qrData.business.email}
+                      onChange={(e) => setQrData({ 
+                        ...qrData, 
+                        business: { ...qrData.business, email: e.target.value }
+                      })}
+                      className="input-elevated mt-2"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="businessWebsite" className="text-sm font-medium">Website</Label>
+                  <Input
+                    id="businessWebsite"
+                    placeholder="https://acme.com"
+                    value={qrData.business.website}
+                    onChange={(e) => setQrData({ 
+                      ...qrData, 
+                      business: { ...qrData.business, website: e.target.value }
+                    })}
+                    className="input-elevated mt-2"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="businessAddress" className="text-sm font-medium">Address</Label>
+                  <Input
+                    id="businessAddress"
+                    placeholder="123 Business St, City, State, ZIP"
+                    value={qrData.business.address}
+                    onChange={(e) => setQrData({ 
+                      ...qrData, 
+                      business: { ...qrData.business, address: e.target.value }
+                    })}
+                    className="input-elevated mt-2"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="businessDescription" className="text-sm font-medium">Description</Label>
+                  <Textarea
+                    id="businessDescription"
+                    placeholder="Brief description of your business..."
+                    value={qrData.business.description}
+                    onChange={(e) => setQrData({ 
+                      ...qrData, 
+                      business: { ...qrData.business, description: e.target.value }
+                    })}
+                    className="input-elevated mt-2"
+                  />
+                </div>
+              </div>
+            )}
+
+            {qrType === 'apps' && (
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="appName" className="text-sm font-medium">App Name</Label>
+                  <Input
+                    id="appName"
+                    placeholder="My Awesome App"
+                    value={qrData.apps.name}
+                    onChange={(e) => setQrData({ 
+                      ...qrData, 
+                      apps: { ...qrData.apps, name: e.target.value }
+                    })}
+                    className="input-elevated mt-2"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="appUrl" className="text-sm font-medium">App Store URL</Label>
+                  <Input
+                    id="appUrl"
+                    type="url"
+                    placeholder="https://apps.apple.com/app/..."
+                    value={qrData.apps.url}
+                    onChange={(e) => setQrData({ 
+                      ...qrData, 
+                      apps: { ...qrData.apps, url: e.target.value }
+                    })}
+                    className="input-elevated mt-2"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="appDescription" className="text-sm font-medium">Description</Label>
+                  <Textarea
+                    id="appDescription"
+                    placeholder="App description..."
+                    value={qrData.apps.description}
+                    onChange={(e) => setQrData({ 
+                      ...qrData, 
+                      apps: { ...qrData.apps, description: e.target.value }
+                    })}
+                    className="input-elevated mt-2"
+                  />
+                </div>
+              </div>
+            )}
+
             {(qrType === 'facebook' || qrType === 'instagram' || qrType === 'twitter' || qrType === 'linkedin' || qrType === 'youtube') && (
               <div>
                 <Label htmlFor="socialUrl" className="text-sm font-medium">{config?.label} URL</Label>
@@ -758,6 +1173,52 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
                 />
               </div>
             )}
+
+            {/* Password Protection Section */}
+            <div className="space-y-4 pt-4 border-t border-border/30">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Lock className="w-5 h-5 text-muted-foreground" />
+                  <div>
+                    <Label className="text-sm font-medium">Password Protection</Label>
+                    <p className="text-xs text-muted-foreground">Require a password to access this QR code</p>
+                  </div>
+                </div>
+                <Switch
+                  checked={hasPassword}
+                  onCheckedChange={setHasPassword}
+                />
+              </div>
+              
+              {hasPassword && (
+                <div className="space-y-2">
+                  <Label htmlFor="qrPassword" className="text-sm font-medium">Password</Label>
+                  <div className="relative">
+                    <Input
+                      id="qrPassword"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Enter password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="input-elevated pr-10"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="w-4 h-4 text-muted-foreground" />
+                      ) : (
+                        <Eye className="w-4 h-4 text-muted-foreground" />
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </Card>
@@ -765,6 +1226,7 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
   };
 
   const qrValue = generateQRValue();
+  const protectedQRValue = getProtectedQRValue();
 
   return (
     <div className="min-h-screen bg-gradient-subtle">
@@ -812,7 +1274,7 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
             {qrTypeConfigs.map((config) => (
               <button
                 key={config.type}
-                onClick={() => setQrType(config.type)}
+                onClick={() => handleQRTypeSelect(config.type)}
                 className={`p-4 rounded-xl border-2 transition-all duration-200 hover:scale-105 ${
                   qrType === config.type 
                     ? 'border-primary bg-primary/5 shadow-lg' 
@@ -924,12 +1386,17 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
           </div>
 
           {/* QR Preview and Actions */}
-          <div className="space-y-6">
+          <div className="space-y-6" ref={qrCodeRef}>
             <Card className="card-elevated animate-slide-in-right">
               <div className="space-y-6 text-center">
                 <div>
-                  <h3 className="text-lg font-semibold mb-2">QR Code Preview</h3>
-                  <p className="text-sm text-muted-foreground">This is how your QR code will look</p>
+                  <h3 className="text-lg font-semibold mb-2 flex items-center justify-center gap-2">
+                    QR Code Preview
+                    {hasPassword && <Lock className="w-4 h-4 text-primary" />}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    {hasPassword ? "Password protected QR code" : "This is how your QR code will look"}
+                  </p>
                 </div>
 
                 <div className="flex justify-center">
@@ -940,7 +1407,7 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
                   >
                     {qrValue ? (
                       <QRCodeSVG
-                        value={qrValue}
+                        value={getProtectedQRValue()}
                         size={qrStyle.size}
                         fgColor={qrStyle.fgColor}
                         bgColor={qrStyle.bgColor}

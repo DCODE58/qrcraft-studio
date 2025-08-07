@@ -69,9 +69,7 @@ const Footer = () => {
         <div className="mt-12 pt-8 border-t border-border/40">
           <div className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
             <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-              <span>© {currentYear} QrCraft. Made with</span>
-              <Heart className="w-4 h-4 text-accent fill-current" />
-              <span>for beautiful QR codes.</span>
+              <span>© {currentYear} Made by Dave</span>
             </div>
             <div className="flex items-center space-x-6 text-sm">
               <a href="#status" className="nav-link">Status</a>
