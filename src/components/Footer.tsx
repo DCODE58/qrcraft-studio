@@ -39,6 +39,9 @@ const Footer = () => {
               <Button variant="ghost" size="sm" className="btn-ghost w-9 h-9 p-0">
                 <Mail className="w-4 h-4" />
               </Button>
+              <Button variant="ghost" size="sm" className="btn-ghost w-9 h-9 p-0">
+                <Instagram className="w-4 h-4" />
+              </Button>
             </div>
           </div>
 
