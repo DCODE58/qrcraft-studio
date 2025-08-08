@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { toPng, toSvg } from 'html-to-image';
+import { HexColorPicker } from 'react-colorful';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -61,7 +62,12 @@ interface QRData {
     address: string;
     description: string;
   };
-  video: string;
+  video: {
+    title: string;
+    description: string;
+    url: string;
+    customTag: string;
+  };
   images: string;
   social: string;
   whatsapp: {
@@ -150,7 +156,12 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
       address: '',
       description: ''
     },
-    video: '',
+    video: {
+      title: '',
+      description: '',
+      url: '',
+      customTag: ''
+    },
     images: '',
     social: '',
     whatsapp: {
@@ -276,7 +287,7 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
         setQrData({ ...qrData, mp3: fileUrl });
         break;
       case 'video':
-        setQrData({ ...qrData, video: fileUrl });
+        setQrData({ ...qrData, video: { ...qrData.video, url: fileUrl } });
         break;
       case 'images':
         setQrData({ ...qrData, images: fileUrl });
@@ -372,7 +383,7 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
       case 'business':
         return `BEGIN:VCARD\nVERSION:3.0\nORG:${qrData.business.name}\nTEL:${qrData.business.phone}\nEMAIL:${qrData.business.email}\nURL:${qrData.business.website}\nADR:${qrData.business.address}\nNOTE:${qrData.business.description}\nEND:VCARD`;
       case 'video':
-        return qrData.video;
+        return qrData.video.url || `Video: ${qrData.video.title}\nDescription: ${qrData.video.description}\nTag: ${qrData.video.customTag}`;
       case 'images':
         return qrData.images;
       case 'social':
@@ -530,16 +541,26 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
             )}
 
             {qrType === 'url' && (
-              <div>
-                <Label htmlFor="url" className="text-sm font-medium">Website URL</Label>
-                <Input
-                  id="url"
-                  type="url"
-                  placeholder="https://example.com"
-                  value={qrData.url}
-                  onChange={(e) => setQrData({ ...qrData, url: e.target.value })}
-                  className="input-elevated mt-2"
-                />
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="url" className="text-sm font-medium">Website URL</Label>
+                  <Input
+                    id="url"
+                    type="url"
+                    placeholder="https://example.com"
+                    value={qrData.url}
+                    onChange={(e) => setQrData({ ...qrData, url: e.target.value })}
+                    className="input-elevated mt-2 bg-background text-foreground"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="url-custom-tag" className="text-sm font-medium">Custom Tag (Optional)</Label>
+                  <Input
+                    id="url-custom-tag"
+                    placeholder="Add your custom tag here..."
+                    className="input-elevated mt-2 bg-background text-foreground"
+                  />
+                </div>
               </div>
             )}
 
@@ -848,7 +869,7 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
 
             {qrType === 'pdf' && (
               <div className="space-y-4">
-                <div className="border-2 border-dashed border-green-200 rounded-lg p-8 text-center bg-green-50/50">
+                <div className="border-2 border-dashed border-green-200 dark:border-green-800 rounded-lg p-8 text-center bg-green-50/50 dark:bg-green-950/20">
                   <FileText className="w-12 h-12 text-green-500 mx-auto mb-4" />
                   <p className="text-sm text-muted-foreground mb-4">Upload the PDF file you want to display</p>
                   <input
@@ -868,7 +889,7 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
                   <p className="text-xs text-muted-foreground">Maximum size: 25MB</p>
                 </div>
                 {uploadedFiles.pdf && (
-                  <div className="text-sm text-green-600 flex items-center gap-2">
+                  <div className="text-sm text-green-600 dark:text-green-400 flex items-center gap-2">
                     <CheckCircle className="w-4 h-4" />
                     File uploaded: {uploadedFiles.pdf.name}
                   </div>
@@ -878,7 +899,7 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
 
             {qrType === 'mp3' && (
               <div className="space-y-4">
-                <div className="border-2 border-dashed border-green-200 rounded-lg p-8 text-center bg-green-50/50">
+                <div className="border-2 border-dashed border-green-200 dark:border-green-800 rounded-lg p-8 text-center bg-green-50/50 dark:bg-green-950/20">
                   <Music className="w-12 h-12 text-green-500 mx-auto mb-4" />
                   <p className="text-sm text-muted-foreground mb-4">Upload an audio file from your device</p>
                   <input
@@ -898,7 +919,7 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
                   <p className="text-xs text-muted-foreground">Maximum size: 25MB</p>
                 </div>
                 {uploadedFiles.mp3 && (
-                  <div className="text-sm text-green-600 flex items-center gap-2">
+                  <div className="text-sm text-green-600 dark:text-green-400 flex items-center gap-2">
                     <CheckCircle className="w-4 h-4" />
                     File uploaded: {uploadedFiles.mp3.name}
                   </div>
@@ -908,26 +929,45 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
 
             {qrType === 'video' && (
               <div className="space-y-4">
-                <div className="border-2 border-dashed border-blue-200 rounded-lg p-8 text-center bg-blue-50/50">
+                <div className="border-2 border-dashed border-blue-200 dark:border-blue-800 rounded-lg p-8 text-center bg-blue-50/50 dark:bg-blue-950/20">
                   <Video className="w-12 h-12 text-blue-500 mx-auto mb-4" />
-                  <p className="text-sm text-muted-foreground mb-4">Add video information</p>
+                  <p className="text-sm text-muted-foreground mb-4">Upload a video file or add video information</p>
+                  
+                  {/* Video Upload Section */}
+                  <div className="mb-6">
+                    <input
+                      type="file"
+                      accept=".mp4,.avi,.mov,.wmv,.webm"
+                      onChange={(e) => e.target.files?.[0] && handleFileUpload(e.target.files[0], 'video')}
+                      className="hidden"
+                      id="video-upload"
+                    />
+                    <Button 
+                      variant="outline" 
+                      onClick={() => document.getElementById('video-upload')?.click()}
+                      className="mb-2"
+                    >
+                      Upload Video File
+                    </Button>
+                    <p className="text-xs text-muted-foreground">Maximum size: 100MB</p>
+                    {uploadedFiles.video && (
+                      <div className="text-sm text-green-600 dark:text-green-400 flex items-center gap-2 mt-2">
+                        <CheckCircle className="w-4 h-4" />
+                        File uploaded: {uploadedFiles.video.name}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Video Details Form */}
                   <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="video-company" className="text-sm font-medium">Company</Label>
-                      <Input
-                        id="video-company"
-                        placeholder="E.g. My Company"
-                        value={qrData.video}
-                        onChange={(e) => setQrData({ ...qrData, video: e.target.value })}
-                        className="input-elevated mt-2"
-                      />
-                    </div>
                     <div>
                       <Label htmlFor="video-title" className="text-sm font-medium">Video Title</Label>
                       <Input
                         id="video-title"
-                        placeholder="E.g. My Video"
-                        className="input-elevated mt-2"
+                        placeholder="E.g. My Awesome Video"
+                        value={qrData.video.title}
+                        onChange={(e) => setQrData({ ...qrData, video: { ...qrData.video, title: e.target.value } })}
+                        className="input-elevated mt-2 bg-background text-foreground"
                       />
                     </div>
                     <div>
@@ -935,14 +975,22 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
                       <Textarea
                         id="video-description"
                         placeholder="E.g. Here is a video about..."
-                        className="input-elevated mt-2 min-h-[80px]"
+                        value={qrData.video.description}
+                        onChange={(e) => setQrData({ ...qrData, video: { ...qrData.video, description: e.target.value } })}
+                        className="input-elevated mt-2 min-h-[80px] bg-background text-foreground"
                       />
-                      <div className="text-xs text-muted-foreground text-right mt-1">0 / 4000</div>
+                      <div className="text-xs text-muted-foreground text-right mt-1">{qrData.video.description.length} / 4000</div>
                     </div>
-                    <Button variant="outline" className="w-full">
-                      <Sparkles className="w-4 h-4 mr-2" />
-                      Add Button
-                    </Button>
+                    <div>
+                      <Label htmlFor="video-custom-tag" className="text-sm font-medium">Custom Tag</Label>
+                      <Input
+                        id="video-custom-tag"
+                        placeholder="Add your custom tag here..."
+                        value={qrData.video.customTag}
+                        onChange={(e) => setQrData({ ...qrData, video: { ...qrData.video, customTag: e.target.value } })}
+                        className="input-elevated mt-2 bg-background text-foreground"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -950,7 +998,7 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
 
             {qrType === 'images' && (
               <div className="space-y-4">
-                <div className="border-2 border-dashed border-purple-200 rounded-lg p-8 text-center bg-purple-50/50">
+                <div className="border-2 border-dashed border-purple-200 dark:border-purple-800 rounded-lg p-8 text-center bg-purple-50/50 dark:bg-purple-950/20">
                   <ImageIcon className="w-12 h-12 text-purple-500 mx-auto mb-4" />
                   <div className="space-y-4">
                     <div>
@@ -958,7 +1006,7 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
                       <Input
                         id="gallery-title"
                         placeholder="E.g. My gallery"
-                        className="input-elevated mt-2"
+                        className="input-elevated mt-2 bg-background text-foreground"
                       />
                     </div>
                     <div>
@@ -975,7 +1023,7 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
                       <Input
                         id="gallery-website"
                         placeholder="E.g. https://www.mypictures.com/"
-                        className="input-elevated mt-2"
+                        className="input-elevated mt-2 bg-background text-foreground"
                       />
                     </div>
                     <Button variant="outline" className="w-full">
@@ -1601,21 +1649,33 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
                   </div>
                 </div>
 
-                {/* Primary Color Customization */}
+                {/* Interactive Color Picker */}
                 <div className="space-y-4">
-                  <Label className="text-sm font-medium">Primary color</Label>
-                  <div className="flex gap-2">
-                    <div 
-                      className="w-12 h-10 rounded border"
-                      style={{ backgroundColor: qrStyle.fgColor }}
-                    />
-                    <Input
-                      type="text"
-                      value={qrStyle.fgColor}
-                      onChange={(e) => setQrStyle({ ...qrStyle, fgColor: e.target.value })}
-                      className="input-elevated flex-1"
-                      placeholder="#527AC9"
-                    />
+                  <Label className="text-sm font-medium">Custom Color Picker</Label>
+                  <div className="flex flex-col gap-4 p-4 bg-muted/30 dark:bg-muted/20 rounded-lg border border-border/50">
+                    <div className="w-full max-w-xs mx-auto">
+                      <HexColorPicker 
+                        color={qrStyle.fgColor} 
+                        onChange={(color) => {
+                          setQrStyle({ ...qrStyle, fgColor: color });
+                          setCurrentStep(3);
+                        }}
+                        style={{ width: '100%', height: '200px' }}
+                      />
+                    </div>
+                    <div className="flex gap-2 items-center">
+                      <div 
+                        className="w-12 h-10 rounded border border-border"
+                        style={{ backgroundColor: qrStyle.fgColor }}
+                      />
+                      <Input
+                        type="text"
+                        value={qrStyle.fgColor}
+                        onChange={(e) => setQrStyle({ ...qrStyle, fgColor: e.target.value })}
+                        className="input-elevated flex-1 bg-background text-foreground"
+                        placeholder="#527AC9"
+                      />
+                    </div>
                   </div>
                 </div>
 
