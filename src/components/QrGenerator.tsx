@@ -198,10 +198,24 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
   const [hasPassword, setHasPassword] = useState(false);
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [currentStep, setCurrentStep] = useState(1);
+  const [selectedColorPalette, setSelectedColorPalette] = useState('blue-green');
+  const [qrFrame, setQrFrame] = useState('scan-me');
+  const [uploadedFiles, setUploadedFiles] = useState<{[key: string]: File}>({});
   const qrCodeRef = useRef<HTMLDivElement>(null);
+  const contentFormRef = useRef<HTMLDivElement>(null);
 
   const qrRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+
+  const colorPalettes = {
+    'blue-green': { primary: '#527AC9', secondary: '#7EC09F' },
+    'black': { primary: '#000000', secondary: '#333333' },
+    'dark-blue': { primary: '#1E3A8A', secondary: '#3B82F6' },
+    'purple': { primary: '#7C3AED', secondary: '#A78BFA' },
+    'green-black': { primary: '#059669', secondary: '#000000' },
+    'yellow-black': { primary: '#F59E0B', secondary: '#000000' }
+  };
 
   const qrTypeConfigs = [
     { type: 'url' as QRType, label: 'Website', icon: Globe, color: 'text-blue-500', description: 'Link to any website URL' },
@@ -229,12 +243,12 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
     { type: 'crypto' as QRType, label: 'Crypto', icon: CreditCard, color: 'text-yellow-600', description: 'Cryptocurrency payment' }
   ];
 
-  // Auto-scroll to QR preview when type is selected
-  const scrollToQRCode = () => {
-    if (qrCodeRef.current) {
-      qrCodeRef.current.scrollIntoView({ 
+  // Auto-scroll to content form when type is selected
+  const scrollToContentForm = () => {
+    if (contentFormRef.current) {
+      contentFormRef.current.scrollIntoView({ 
         behavior: 'smooth', 
-        block: 'center' 
+        block: 'start' 
       });
     }
   };
@@ -242,10 +256,32 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
   // Handle QR type selection with auto-scroll
   const handleQRTypeSelect = (type: QRType) => {
     setQrType(type);
+    setCurrentStep(2);
     // Delay scroll to ensure the content form is rendered
     setTimeout(() => {
-      scrollToQRCode();
+      scrollToContentForm();
     }, 100);
+  };
+
+  // Handle file upload
+  const handleFileUpload = (file: File, type: string) => {
+    setUploadedFiles(prev => ({ ...prev, [type]: file }));
+    const fileUrl = URL.createObjectURL(file);
+    
+    switch (type) {
+      case 'pdf':
+        setQrData({ ...qrData, pdf: fileUrl });
+        break;
+      case 'mp3':
+        setQrData({ ...qrData, mp3: fileUrl });
+        break;
+      case 'video':
+        setQrData({ ...qrData, video: fileUrl });
+        break;
+      case 'images':
+        setQrData({ ...qrData, images: fileUrl });
+        break;
+    }
   };
 
   // Get current location for location QR type
@@ -289,24 +325,24 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
   const StepIndicator = () => (
     <div className="flex items-center justify-center gap-4 mb-8">
       <div className="flex items-center">
-        <div className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-semibold">
-          1
+        <div className={`w-8 h-8 ${currentStep >= 1 ? 'bg-primary text-white' : 'bg-muted text-muted-foreground'} rounded-full flex items-center justify-center text-sm font-semibold`}>
+          {currentStep > 1 ? <CheckCircle className="w-4 h-4" /> : '1'}
         </div>
-        <span className="ml-2 text-sm font-medium text-primary">Select QR type</span>
+        <span className={`ml-2 text-sm font-medium ${currentStep >= 1 ? 'text-primary' : 'text-muted-foreground'}`}>Select QR type</span>
       </div>
-      <div className="w-8 h-0.5 bg-border"></div>
+      <div className={`w-8 h-0.5 ${currentStep > 1 ? 'bg-primary' : 'bg-border'}`}></div>
       <div className="flex items-center">
-        <div className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-semibold">
-          2
+        <div className={`w-8 h-8 ${currentStep >= 2 ? 'bg-primary text-white' : 'bg-muted text-muted-foreground'} rounded-full flex items-center justify-center text-sm font-semibold`}>
+          {currentStep > 2 ? <CheckCircle className="w-4 h-4" /> : '2'}
         </div>
-        <span className="ml-2 text-sm font-medium text-primary">Add content</span>
+        <span className={`ml-2 text-sm font-medium ${currentStep >= 2 ? 'text-primary' : 'text-muted-foreground'}`}>Add content</span>
       </div>
-      <div className="w-8 h-0.5 bg-border"></div>
+      <div className={`w-8 h-0.5 ${currentStep > 2 ? 'bg-primary' : 'bg-border'}`}></div>
       <div className="flex items-center">
-        <div className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-semibold">
+        <div className={`w-8 h-8 ${currentStep >= 3 ? 'bg-primary text-white' : 'bg-muted text-muted-foreground'} rounded-full flex items-center justify-center text-sm font-semibold`}>
           3
         </div>
-        <span className="ml-2 text-sm font-medium text-primary">Design QR code</span>
+        <span className={`ml-2 text-sm font-medium ${currentStep >= 3 ? 'text-primary' : 'text-muted-foreground'}`}>Design QR code</span>
       </div>
     </div>
   );
@@ -466,17 +502,18 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
     const IconComponent = config?.icon || QrCode;
 
     return (
-      <Card className="card-elevated animate-slide-in-left">
-        <div className="space-y-6">
-          <div className="flex items-center gap-3">
-            <div className={`w-12 h-12 rounded-xl bg-muted/50 flex items-center justify-center`}>
-              <IconComponent className={`w-6 h-6 ${config?.color || 'text-gray-500'}`} />
+      <div ref={contentFormRef}>
+        <Card className="card-elevated animate-slide-in-left">
+          <div className="space-y-6">
+            <div className="flex items-center gap-3">
+              <div className={`w-12 h-12 rounded-xl bg-muted/50 flex items-center justify-center`}>
+                <IconComponent className={`w-6 h-6 ${config?.color || 'text-gray-500'}`} />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold">{config?.label || 'Content'}</h3>
+                <p className="text-sm text-muted-foreground">{config?.description}</p>
+              </div>
             </div>
-            <div>
-              <h3 className="text-lg font-semibold">{config?.label || 'Content'}</h3>
-              <p className="text-sm text-muted-foreground">{config?.description}</p>
-            </div>
-          </div>
 
           <div className="space-y-4">
             {qrType === 'text' && (
@@ -809,17 +846,236 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
               </div>
             )}
 
-            {(qrType === 'pdf' || qrType === 'video' || qrType === 'images' || qrType === 'mp3' || qrType === 'menu' || qrType === 'links' || qrType === 'social') && (
-              <div>
-                <Label htmlFor="urlInput" className="text-sm font-medium">URL</Label>
-                <Input
-                  id="urlInput"
-                  type="url"
-                  placeholder="https://example.com"
-                  value={qrData[qrType as keyof QRData] as string}
-                  onChange={(e) => setQrData({ ...qrData, [qrType]: e.target.value })}
-                  className="input-elevated mt-2"
-                />
+            {qrType === 'pdf' && (
+              <div className="space-y-4">
+                <div className="border-2 border-dashed border-green-200 rounded-lg p-8 text-center bg-green-50/50">
+                  <FileText className="w-12 h-12 text-green-500 mx-auto mb-4" />
+                  <p className="text-sm text-muted-foreground mb-4">Upload the PDF file you want to display</p>
+                  <input
+                    type="file"
+                    accept=".pdf"
+                    onChange={(e) => e.target.files?.[0] && handleFileUpload(e.target.files[0], 'pdf')}
+                    className="hidden"
+                    id="pdf-upload"
+                  />
+                  <Button 
+                    variant="outline" 
+                    onClick={() => document.getElementById('pdf-upload')?.click()}
+                    className="mb-2"
+                  >
+                    Upload PDF
+                  </Button>
+                  <p className="text-xs text-muted-foreground">Maximum size: 25MB</p>
+                </div>
+                {uploadedFiles.pdf && (
+                  <div className="text-sm text-green-600 flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4" />
+                    File uploaded: {uploadedFiles.pdf.name}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {qrType === 'mp3' && (
+              <div className="space-y-4">
+                <div className="border-2 border-dashed border-green-200 rounded-lg p-8 text-center bg-green-50/50">
+                  <Music className="w-12 h-12 text-green-500 mx-auto mb-4" />
+                  <p className="text-sm text-muted-foreground mb-4">Upload an audio file from your device</p>
+                  <input
+                    type="file"
+                    accept=".mp3,.wav,.ogg"
+                    onChange={(e) => e.target.files?.[0] && handleFileUpload(e.target.files[0], 'mp3')}
+                    className="hidden"
+                    id="mp3-upload"
+                  />
+                  <Button 
+                    variant="outline" 
+                    onClick={() => document.getElementById('mp3-upload')?.click()}
+                    className="mb-2"
+                  >
+                    Upload MP3
+                  </Button>
+                  <p className="text-xs text-muted-foreground">Maximum size: 25MB</p>
+                </div>
+                {uploadedFiles.mp3 && (
+                  <div className="text-sm text-green-600 flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4" />
+                    File uploaded: {uploadedFiles.mp3.name}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {qrType === 'video' && (
+              <div className="space-y-4">
+                <div className="border-2 border-dashed border-blue-200 rounded-lg p-8 text-center bg-blue-50/50">
+                  <Video className="w-12 h-12 text-blue-500 mx-auto mb-4" />
+                  <p className="text-sm text-muted-foreground mb-4">Add video information</p>
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="video-company" className="text-sm font-medium">Company</Label>
+                      <Input
+                        id="video-company"
+                        placeholder="E.g. My Company"
+                        value={qrData.video}
+                        onChange={(e) => setQrData({ ...qrData, video: e.target.value })}
+                        className="input-elevated mt-2"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="video-title" className="text-sm font-medium">Video Title</Label>
+                      <Input
+                        id="video-title"
+                        placeholder="E.g. My Video"
+                        className="input-elevated mt-2"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="video-description" className="text-sm font-medium">Description</Label>
+                      <Textarea
+                        id="video-description"
+                        placeholder="E.g. Here is a video about..."
+                        className="input-elevated mt-2 min-h-[80px]"
+                      />
+                      <div className="text-xs text-muted-foreground text-right mt-1">0 / 4000</div>
+                    </div>
+                    <Button variant="outline" className="w-full">
+                      <Sparkles className="w-4 h-4 mr-2" />
+                      Add Button
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {qrType === 'images' && (
+              <div className="space-y-4">
+                <div className="border-2 border-dashed border-purple-200 rounded-lg p-8 text-center bg-purple-50/50">
+                  <ImageIcon className="w-12 h-12 text-purple-500 mx-auto mb-4" />
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="gallery-title" className="text-sm font-medium">Image gallery/album title</Label>
+                      <Input
+                        id="gallery-title"
+                        placeholder="E.g. My gallery"
+                        className="input-elevated mt-2"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="gallery-description" className="text-sm font-medium">Image gallery/album description</Label>
+                      <Textarea
+                        id="gallery-description"
+                        placeholder="E.g. Summer Pictures"
+                        className="input-elevated mt-2 min-h-[80px]"
+                      />
+                      <div className="text-xs text-muted-foreground text-right mt-1">0 / 4000</div>
+                    </div>
+                    <div>
+                      <Label htmlFor="gallery-website" className="text-sm font-medium">Website</Label>
+                      <Input
+                        id="gallery-website"
+                        placeholder="E.g. https://www.mypictures.com/"
+                        className="input-elevated mt-2"
+                      />
+                    </div>
+                    <Button variant="outline" className="w-full">
+                      <Sparkles className="w-4 h-4 mr-2" />
+                      Add Button
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {qrType === 'menu' && (
+              <div className="space-y-6">
+                <div className="text-center">
+                  <h3 className="text-lg font-semibold mb-2">How do you want to create your Menu QR Code?</h3>
+                </div>
+                
+                <div className="grid gap-4">
+                  <Button variant="outline" className="h-auto p-4 justify-start">
+                    <FileText className="w-6 h-6 mr-3 text-blue-500" />
+                    <div className="text-left">
+                      <div className="font-medium">I want to create a digital menu</div>
+                    </div>
+                  </Button>
+                  
+                  <Button variant="outline" className="h-auto p-4 justify-start">
+                    <FileText className="w-6 h-6 mr-3 text-blue-500" />
+                    <div className="text-left">
+                      <div className="font-medium">I have a PDF version of my menu</div>
+                    </div>
+                  </Button>
+                  
+                  <Button variant="outline" className="h-auto p-4 justify-start">
+                    <Link className="w-6 h-6 mr-3 text-blue-500" />
+                    <div className="text-left">
+                      <div className="font-medium">I have a link that redirects to my menu</div>
+                    </div>
+                  </Button>
+                </div>
+
+                <div className="space-y-4 border-t pt-4">
+                  <h4 className="font-medium">Menu Builder</h4>
+                  <div>
+                    <Label className="text-sm font-medium">Name of the section *</Label>
+                    <Input
+                      placeholder="E.g. Appetizers"
+                      className="input-elevated mt-2"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium">Description</Label>
+                    <Textarea
+                      placeholder="E.g. Irresistible selection of appetizers"
+                      className="input-elevated mt-2 min-h-[80px]"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {qrType === 'links' && (
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="links-title" className="text-sm font-medium">Title</Label>
+                  <Input
+                    id="links-title"
+                    placeholder="Links Collection"
+                    value={qrData.links}
+                    onChange={(e) => setQrData({ ...qrData, links: e.target.value })}
+                    className="input-elevated mt-2"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="links-description" className="text-sm font-medium">Description</Label>
+                  <Textarea
+                    id="links-description"
+                    placeholder="Collection of useful links"
+                    className="input-elevated mt-2 min-h-[80px]"
+                  />
+                </div>
+                <Button variant="outline" className="w-full">
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  Add Link
+                </Button>
+              </div>
+            )}
+
+            {qrType === 'social' && (
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="social-url" className="text-sm font-medium">Social Media URL</Label>
+                  <Input
+                    id="social-url"
+                    type="url"
+                    placeholder="https://instagram.com/username"
+                    value={qrData.social}
+                    onChange={(e) => setQrData({ ...qrData, social: e.target.value })}
+                    className="input-elevated mt-2"
+                  />
+                </div>
               </div>
             )}
 
@@ -1222,6 +1478,7 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
           </div>
         </div>
       </Card>
+      </div>
     );
   };
 
@@ -1311,42 +1568,83 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="fgColor" className="text-sm font-medium">Foreground Color</Label>
-                    <div className="flex gap-2 mt-2">
-                      <Input
-                        id="fgColor"
-                        type="color"
-                        value={qrStyle.fgColor}
-                        onChange={(e) => setQrStyle({ ...qrStyle, fgColor: e.target.value })}
-                        className="w-16 h-10 p-1 border"
+                {/* Color Palette Selection */}
+                <div className="space-y-4">
+                  <Label className="text-sm font-medium">Color palette</Label>
+                  <div className="grid grid-cols-3 gap-3">
+                    {Object.entries(colorPalettes).map(([key, palette]) => (
+                      <button
+                        key={key}
+                        onClick={() => {
+                          setSelectedColorPalette(key);
+                          setQrStyle({
+                            ...qrStyle,
+                            fgColor: palette.primary,
+                            bgColor: '#FFFFFF'
+                          });
+                          setCurrentStep(3);
+                        }}
+                        className={`h-20 rounded-lg border-2 transition-all ${
+                          selectedColorPalette === key 
+                            ? 'border-primary ring-2 ring-primary/20' 
+                            : 'border-border hover:border-primary/50'
+                        }`}
+                        style={{
+                          background: key === 'blue-green' 
+                            ? `linear-gradient(135deg, ${palette.primary}, ${palette.secondary})`
+                            : key.includes('black')
+                            ? `linear-gradient(135deg, ${palette.primary}, ${palette.secondary})`
+                            : palette.primary
+                        }}
                       />
-                      <Input
-                        type="text"
-                        value={qrStyle.fgColor}
-                        onChange={(e) => setQrStyle({ ...qrStyle, fgColor: e.target.value })}
-                        className="input-elevated flex-1"
-                      />
-                    </div>
+                    ))}
                   </div>
-                  <div>
-                    <Label htmlFor="bgColor" className="text-sm font-medium">Background Color</Label>
-                    <div className="flex gap-2 mt-2">
-                      <Input
-                        id="bgColor"
-                        type="color"
-                        value={qrStyle.bgColor}
-                        onChange={(e) => setQrStyle({ ...qrStyle, bgColor: e.target.value })}
-                        className="w-16 h-10 p-1 border"
-                      />
-                      <Input
-                        type="text"
-                        value={qrStyle.bgColor}
-                        onChange={(e) => setQrStyle({ ...qrStyle, bgColor: e.target.value })}
-                        className="input-elevated flex-1"
-                      />
-                    </div>
+                </div>
+
+                {/* Primary Color Customization */}
+                <div className="space-y-4">
+                  <Label className="text-sm font-medium">Primary color</Label>
+                  <div className="flex gap-2">
+                    <div 
+                      className="w-12 h-10 rounded border"
+                      style={{ backgroundColor: qrStyle.fgColor }}
+                    />
+                    <Input
+                      type="text"
+                      value={qrStyle.fgColor}
+                      onChange={(e) => setQrStyle({ ...qrStyle, fgColor: e.target.value })}
+                      className="input-elevated flex-1"
+                      placeholder="#527AC9"
+                    />
+                  </div>
+                </div>
+
+                {/* QR Frame Selection */}
+                <div className="space-y-4">
+                  <Label className="text-sm font-medium">QR Frame Style</Label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      onClick={() => setQrFrame('scan-me')}
+                      className={`p-4 border-2 rounded-lg text-center transition-all ${
+                        qrFrame === 'scan-me' 
+                          ? 'border-primary bg-primary/5' 
+                          : 'border-border hover:border-primary/50'
+                      }`}
+                    >
+                      <div className="text-sm font-medium">Scan Me</div>
+                      <div className="text-xs text-muted-foreground mt-1">Classic frame</div>
+                    </button>
+                    <button
+                      onClick={() => setQrFrame('custom')}
+                      className={`p-4 border-2 rounded-lg text-center transition-all ${
+                        qrFrame === 'custom' 
+                          ? 'border-primary bg-primary/5' 
+                          : 'border-border hover:border-primary/50'
+                      }`}
+                    >
+                      <div className="text-sm font-medium">Custom</div>
+                      <div className="text-xs text-muted-foreground mt-1">Customizable frame</div>
+                    </button>
                   </div>
                 </div>
 
@@ -1402,9 +1700,19 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
                 <div className="flex justify-center">
                   <div 
                     ref={qrRef}
-                    className="inline-block p-6 bg-white rounded-2xl shadow-lg border-2 border-border/20"
+                    className={`inline-block p-6 rounded-2xl shadow-lg border-2 border-border/20 ${
+                      qrFrame === 'scan-me' ? 'bg-white' : 'bg-white'
+                    }`}
                     style={{ backgroundColor: qrStyle.bgColor }}
                   >
+                    {qrFrame === 'scan-me' && qrValue && (
+                      <div className="text-center mb-4">
+                        <span className="inline-block px-3 py-1 bg-primary text-white text-sm font-medium rounded-full">
+                          Scan Me
+                        </span>
+                      </div>
+                    )}
+                    
                     {qrValue ? (
                       <QRCodeSVG
                         value={getProtectedQRValue()}
@@ -1423,6 +1731,14 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
                           <QrCode className="w-12 h-12 text-muted-foreground/50 mx-auto mb-2" />
                           <p className="text-sm text-muted-foreground">Enter content to generate QR code</p>
                         </div>
+                      </div>
+                    )}
+                    
+                    {qrFrame === 'custom' && qrValue && (
+                      <div className="text-center mt-4">
+                        <span className="inline-block px-3 py-1 bg-secondary text-secondary-foreground text-sm font-medium rounded-full">
+                          Custom Frame
+                        </span>
                       </div>
                     )}
                   </div>
