@@ -3,7 +3,6 @@ import { QrCode, Sparkles, Download, Palette, Smartphone, Zap, Star, Globe, Shie
 import QrGenerator from "@/components/QrGenerator";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import CookieConsent from "@/components/CookieConsent";
 import { useState } from "react";
 import heroImage from "@/assets/hero-image.jpg";
 
@@ -31,7 +30,7 @@ const Index = () => {
             
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight">
               <span className="bg-gradient-hero bg-clip-text text-transparent">
-                Qr Studio
+                QrCraft
               </span>
             </h1>
             
@@ -110,7 +109,7 @@ const Index = () => {
               <span className="text-primary"> perfect QR codes</span>
             </h2>
             <p className="text-muted-foreground text-lg lg:text-xl max-w-3xl mx-auto leading-relaxed">
-              From simple URLs to complex business cards, Qr Studio handles it all with professional-grade features and beautiful design.
+              From simple URLs to complex business cards, QrCraft handles it all with professional-grade features and beautiful design.
             </p>
           </div>
           
@@ -220,7 +219,6 @@ const Index = () => {
       </section>
 
       <Footer />
-      <CookieConsent />
     </div>
   );
 };
