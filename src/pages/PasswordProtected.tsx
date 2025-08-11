@@ -25,8 +25,12 @@ const PasswordProtected = () => {
         const decodedData = JSON.parse(atob(encodedData));
         setProtectedData(decodedData);
       } catch (error) {
+        console.error('Error parsing protected data:', error);
         setError('Invalid protected QR code data');
       }
+    } else {
+      // For testing purposes, if no hash is provided, show error
+      setError('No protected QR code data found');
     }
   }, [location]);
 
@@ -40,8 +44,9 @@ const PasswordProtected = () => {
     setTimeout(() => {
       if (password === protectedData.password) {
         toast({
-          title: "Access Granted!",
+          title: "🎉 Access Granted!",
           description: "QR code content unlocked successfully.",
+          className: "border-green-200 bg-green-50 text-green-900",
         });
         
         // Display the protected content based on type
@@ -49,22 +54,66 @@ const PasswordProtected = () => {
           window.open(protectedData.content, '_blank');
         } else {
           // For other content types, display in a new window or copy to clipboard
-          navigator.clipboard.writeText(protectedData.content);
-          toast({
-            title: "Content Copied!",
-            description: "The protected content has been copied to your clipboard.",
-          });
+          if (navigator.clipboard) {
+            navigator.clipboard.writeText(protectedData.content).then(() => {
+              toast({
+                title: "📋 Content Copied!",
+                description: "The protected content has been copied to your clipboard.",
+                className: "border-blue-200 bg-blue-50 text-blue-900",
+              });
+            }).catch(() => {
+              // Fallback for clipboard API
+              displayContentInModal(protectedData.content);
+            });
+          } else {
+            displayContentInModal(protectedData.content);
+          }
         }
       } else {
         setError('Incorrect password. Please try again.');
         toast({
-          title: "Access Denied",
+          title: "🚫 Access Denied",
           description: "The password you entered is incorrect.",
           variant: "destructive",
+          className: "border-red-200 bg-red-50 text-red-900",
         });
       }
       setIsLoading(false);
     }, 1000);
+  };
+
+  const displayContentInModal = (content: string) => {
+    // Create a simple modal to display content
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+      background: rgba(0,0,0,0.8); display: flex; align-items: center; 
+      justify-content: center; z-index: 9999;
+    `;
+    
+    const contentDiv = document.createElement('div');
+    contentDiv.style.cssText = `
+      background: white; padding: 2rem; border-radius: 0.5rem; 
+      max-width: 90%; max-height: 90%; overflow: auto; margin: 1rem;
+    `;
+    
+    contentDiv.innerHTML = `
+      <h3 style="margin-bottom: 1rem; font-weight: bold;">Protected Content:</h3>
+      <p style="word-break: break-all; margin-bottom: 1rem;">${content}</p>
+      <button onclick="this.closest('[style*=fixed]').remove()" 
+              style="background: #2563EB; color: white; padding: 0.5rem 1rem; 
+                     border: none; border-radius: 0.25rem; cursor: pointer;">
+        Close
+      </button>
+    `;
+    
+    modal.appendChild(contentDiv);
+    document.body.appendChild(modal);
+    
+    // Close on outside click
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) modal.remove();
+    });
   };
 
   if (!protectedData) {

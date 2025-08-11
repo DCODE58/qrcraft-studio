@@ -33,6 +33,9 @@ const PwaInstallButton = () => {
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     window.addEventListener('appinstalled', handleAppInstalled);
 
+    // Always show install button
+    setIsVisible(true);
+
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
       window.removeEventListener('appinstalled', handleAppInstalled);
@@ -40,16 +43,25 @@ const PwaInstallButton = () => {
   }, [toast]);
 
   const handleInstall = async () => {
-    if (!deferredPrompt) return;
+    if (!deferredPrompt) {
+      // Show fallback instructions for manual installation
+      toast({
+        title: "📱 Install Qr Studio",
+        description: "On mobile: Tap the share button and 'Add to Home Screen'. On desktop: Look for the install button in your address bar.",
+        className: "border-blue-200 bg-blue-50 text-blue-900",
+        duration: 6000,
+      });
+      return;
+    }
 
     deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
     
     if (outcome === 'accepted') {
       toast({
-        title: "Installing...",
+        title: "🎉 Installing...",
         description: "Qr Studio is being installed on your device.",
-        className: "bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200",
+        className: "border-green-200 bg-green-50 text-green-900",
       });
     }
     
@@ -57,7 +69,8 @@ const PwaInstallButton = () => {
     setIsVisible(false);
   };
 
-  if (!isVisible || !deferredPrompt) return null;
+  // Show button if prompt is available OR if we want to show fallback instructions
+  if (!isVisible && !deferredPrompt) return null;
 
   return (
     <Button 
