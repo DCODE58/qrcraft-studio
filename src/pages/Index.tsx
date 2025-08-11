@@ -20,8 +20,8 @@ const Index = () => {
       <Header />
       
       {/* Hero Section */}
-      <section className="relative overflow-hidden pt-8">
-        <div className="container mx-auto px-4 sm:px-6 py-12 lg:py-20">
+      <section className="relative overflow-hidden pt-4 sm:pt-8">
+        <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-12 lg:py-20">
           <div className="text-center space-y-8 animate-fade-in">
             <div className="flex justify-center mb-6">
               <div className="relative">
@@ -30,13 +30,13 @@ const Index = () => {
               </div>
             </div>
             
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight">
               <span className="bg-gradient-hero bg-clip-text text-transparent">
                 Qr Studio
               </span>
             </h1>
             
-            <p className="text-lg md:text-xl lg:text-2xl text-muted-foreground max-w-4xl mx-auto leading-relaxed">
+            <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-muted-foreground max-w-4xl mx-auto leading-relaxed px-4">
               The professional QR code generator trusted by 
               <span className="text-primary font-semibold"> thousands of businesses</span>. 
               Create beautiful, customizable QR codes with 
@@ -47,9 +47,9 @@ const Index = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-6">
               <Button 
                 onClick={() => setShowGenerator(true)}
-                className="btn-premium text-lg px-8 py-4 h-auto group"
+                className="btn-premium text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 h-auto group w-full sm:w-auto max-w-xs"
               >
-                <QrCode className="w-5 h-5 mr-2 group-hover:rotate-12 transition-transform duration-200" />
+                <QrCode className="w-4 h-4 sm:w-5 sm:h-5 mr-2 group-hover:rotate-12 transition-transform duration-200" />
                 Generate QR Code
               </Button>
             </div>
@@ -76,42 +76,42 @@ const Index = () => {
           </div>
           
           {/* Hero Image */}
-          <div className="mt-16 relative animate-slide-up">
+          <div className="mt-8 sm:mt-16 relative animate-slide-up px-2">
             <div className="relative mx-auto max-w-5xl">
-              <div className="absolute inset-0 bg-gradient-hero rounded-3xl blur-3xl opacity-20"></div>
-              <div className="relative z-10 p-2 bg-white/10 backdrop-blur-sm rounded-3xl">
+              <div className="absolute inset-0 bg-gradient-hero rounded-2xl sm:rounded-3xl blur-2xl sm:blur-3xl opacity-20"></div>
+              <div className="relative z-10 p-1 sm:p-2 bg-white/10 backdrop-blur-sm rounded-2xl sm:rounded-3xl">
                 <img 
                   src={heroImage}
                   alt="QR Code Generator Preview - Professional interface showing QR code creation tools"
-                  className="w-full rounded-2xl shadow-xl"
+                  className="w-full rounded-xl sm:rounded-2xl shadow-xl"
                 />
               </div>
-              {/* Floating elements */}
-              <div className="absolute -top-6 -left-6 w-12 h-12 bg-primary/20 rounded-full animate-bounce delay-1000"></div>
-              <div className="absolute -bottom-6 -right-6 w-8 h-8 bg-accent/20 rounded-full animate-bounce delay-500"></div>
+              {/* Floating elements - hidden on mobile */}
+              <div className="absolute -top-6 -left-6 w-8 h-8 sm:w-12 sm:h-12 bg-primary/20 rounded-full animate-bounce delay-1000 hidden sm:block"></div>
+              <div className="absolute -bottom-6 -right-6 w-6 h-6 sm:w-8 sm:h-8 bg-accent/20 rounded-full animate-bounce delay-500 hidden sm:block"></div>
             </div>
           </div>
         </div>
       </section>
 
       {/* Features Section */}
-      <section className="py-16 lg:py-24 bg-surface-container/50">
+      <section className="py-12 sm:py-16 lg:py-24 bg-surface-container/50">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="text-center space-y-6 mb-16 animate-fade-in">
             <div className="inline-flex items-center gap-2 bg-primary-light text-primary px-4 py-2 rounded-full text-sm font-medium">
               <Sparkles className="w-4 h-4" />
               Professional Features
             </div>
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold max-w-3xl mx-auto">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold max-w-3xl mx-auto px-4">
               Everything you need to create 
               <span className="text-primary"> perfect QR codes</span>
             </h2>
-            <p className="text-muted-foreground text-lg lg:text-xl max-w-3xl mx-auto leading-relaxed">
+            <p className="text-muted-foreground text-base sm:text-lg lg:text-xl max-w-3xl mx-auto leading-relaxed px-4">
               From simple URLs to complex business cards, Qr Studio handles it all with professional-grade features and beautiful design.
             </p>
           </div>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
             {[
               {
                 icon: Smartphone,
@@ -161,55 +161,51 @@ const Index = () => {
       </section>
 
       {/* Statistics Section */}
-      <section className="py-16 bg-gradient-hero text-white">
+      <section className="py-12 sm:py-16 bg-gradient-hero text-white">
         <div className="container mx-auto px-4 sm:px-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            <div className="space-y-2">
-              <div className="text-3xl md:text-4xl font-bold">10,000+</div>
-              <div className="text-white/80">QR Codes Generated</div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-8 text-center">
+            <div className="space-y-1 sm:space-y-2">
+              <div className="text-2xl sm:text-3xl md:text-4xl font-bold">10,000+</div>
+              <div className="text-white/80 text-xs sm:text-sm">QR Codes Generated</div>
             </div>
-            <div className="space-y-2">
-              <div className="text-3xl md:text-4xl font-bold">50+</div>
-              <div className="text-white/80">Countries</div>
+            <div className="space-y-1 sm:space-y-2">
+              <div className="text-2xl sm:text-3xl md:text-4xl font-bold">50+</div>
+              <div className="text-white/80 text-xs sm:text-sm">Countries</div>
             </div>
-            <div className="space-y-2">
-              <div className="text-3xl md:text-4xl font-bold">99.9%</div>
-              <div className="text-white/80">Uptime</div>
+            <div className="space-y-1 sm:space-y-2">
+              <div className="text-2xl sm:text-3xl md:text-4xl font-bold">99.9%</div>
+              <div className="text-white/80 text-xs sm:text-sm">Uptime</div>
             </div>
-            <div className="space-y-2">
-              <div className="text-3xl md:text-4xl font-bold">4.9★</div>
-              <div className="text-white/80">User Rating</div>
+            <div className="space-y-1 sm:space-y-2">
+              <div className="text-2xl sm:text-3xl md:text-4xl font-bold">4.9★</div>
+              <div className="text-white/80 text-xs sm:text-sm">User Rating</div>
             </div>
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 lg:py-24 bg-gradient-subtle">
+      <section className="py-12 sm:py-16 lg:py-24 bg-gradient-subtle">
         <div className="container mx-auto px-4 sm:px-6 text-center">
-          <div className="max-w-4xl mx-auto space-y-8 animate-fade-in">
+          <div className="max-w-4xl mx-auto space-y-6 sm:space-y-8 animate-fade-in">
             <div className="inline-flex items-center gap-2 bg-accent-light text-accent px-4 py-2 rounded-full text-sm font-medium mb-4">
               <Users className="w-4 h-4" />
               Join 10,000+ Happy Users
             </div>
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold px-4">
               Ready to create your first 
               <span className="text-primary"> professional QR code</span>?
             </h2>
-            <p className="text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+            <p className="text-base sm:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed px-4">
               Start generating beautiful, customizable QR codes in seconds. No account required, completely free to use.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
               <Button 
                 onClick={() => setShowGenerator(true)}
-                className="btn-premium text-lg px-8 py-4 h-auto group"
+                className="btn-premium text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 h-auto group w-full sm:w-auto max-w-xs"
               >
-                <QrCode className="w-5 h-5 mr-2 group-hover:rotate-12 transition-transform duration-200" />
+                <QrCode className="w-4 h-4 sm:w-5 sm:h-5 mr-2 group-hover:rotate-12 transition-transform duration-200" />
                 Get Started Free
-              </Button>
-              <Button variant="outline" className="text-lg px-8 py-4 h-auto btn-ghost">
-                <Globe className="w-5 h-5 mr-2" />
-                View Live Demo
               </Button>
             </div>
           </div>
