@@ -15,7 +15,7 @@ import {
   Video, Camera, Music, Briefcase, MapPin, Clock, Menu, Store, Ticket, Gift,
   Facebook, Instagram, Twitter, Youtube, Linkedin, Github, Chrome, Smartphone,
   Receipt, Car, Home, CreditCard, FileImage, HelpCircle, QrCode, Eye, EyeOff,
-  Lock, ImageIcon, CheckCircle, Plus, Loader2, Edit3
+  Lock, ImageIcon, CheckCircle, Plus, Loader2, Edit3, X
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Switch } from '@/components/ui/switch';
@@ -76,7 +76,19 @@ interface QRData {
     message: string;
   };
   mp3: string;
-  menu: string;
+  menu: {
+    sections: Array<{
+      id: string;
+      name: string;
+      description: string;
+      items: Array<{
+        id: string;
+        name: string;
+        description: string;
+        price: string;
+      }>;
+    }>;
+  };
   apps: {
     name: string;
     url: string;
@@ -170,7 +182,9 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
       message: ''
     },
     mp3: '',
-    menu: '',
+    menu: {
+      sections: [],
+    },
     apps: {
       name: '',
       url: '',
@@ -217,6 +231,7 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
   const [uploadedFiles, setUploadedFiles] = useState<{[key: string]: File}>({});
   const [socialLinks, setSocialLinks] = useState<{platform: string, url: string}[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [showColorPalette, setShowColorPalette] = useState(false);
   const qrCodeRef = useRef<HTMLDivElement>(null);
   const contentFormRef = useRef<HTMLDivElement>(null);
 
@@ -324,8 +339,9 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
           }
         });
         toast({
-          title: "Location detected!",
+          title: "📍 Location Detected!",
           description: "Your current location has been added to the QR code.",
+          className: "bg-gradient-to-r from-emerald-50 to-green-50 border-emerald-200",
         });
       },
       (error) => {
@@ -401,7 +417,13 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
       case 'mp3':
         return qrData.mp3;
       case 'menu':
-        return qrData.menu;
+        const menuText = qrData.menu.sections.map(section => {
+          const items = section.items.map(item => 
+            `• ${item.name}${item.price ? ' - ' + item.price : ''}${item.description ? ' (' + item.description + ')' : ''}`
+          ).join('\n');
+          return `${section.name}${section.description ? ' - ' + section.description : ''}\n${items}`;
+        }).join('\n\n');
+        return menuText;
       case 'apps':
         return qrData.apps.url;
       case 'coupon':
@@ -467,6 +489,7 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
       toast({
         title: "✨ QR Code Downloaded!",
         description: `Your ${qrType.toUpperCase()} QR code has been saved as ${format.toUpperCase()}.`,
+        className: "bg-gradient-to-r from-green-50 to-emerald-50 border-green-200",
       });
     } catch (error) {
       toast({
@@ -488,6 +511,7 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
       toast({
         title: "📋 Copied to Clipboard!",
         description: "QR code content has been copied to your clipboard.",
+        className: "bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200",
       });
     } catch (error) {
       toast({
@@ -1069,48 +1093,167 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
             {qrType === 'menu' && (
               <div className="space-y-6">
                 <div className="text-center">
-                  <h3 className="text-lg font-semibold mb-2">How do you want to create your Menu QR Code?</h3>
+                  <h3 className="text-lg font-semibold mb-2">Create Your Restaurant Menu</h3>
+                  <p className="text-sm text-muted-foreground">Build a digital menu with sections and items</p>
                 </div>
                 
-                <div className="grid gap-4">
-                  <Button variant="outline" className="h-auto p-4 justify-start">
-                    <FileText className="w-6 h-6 mr-3 text-blue-500" />
-                    <div className="text-left">
-                      <div className="font-medium">I want to create a digital menu</div>
+                {/* Menu Sections */}
+                <div className="space-y-6">
+                  {qrData.menu.sections.map((section, sectionIndex) => (
+                    <div key={section.id} className="p-4 border border-border rounded-lg bg-muted/20">
+                      <div className="flex items-center justify-between mb-4">
+                        <h4 className="font-semibold">Section {sectionIndex + 1}</h4>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            const newSections = qrData.menu.sections.filter((_, i) => i !== sectionIndex);
+                            setQrData({ ...qrData, menu: { sections: newSections } });
+                          }}
+                          className="text-destructive hover:text-destructive"
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                      
+                      <div className="space-y-4">
+                        <div>
+                          <Label className="text-sm font-medium">Section Name *</Label>
+                          <Input
+                            placeholder="E.g. Appetizers, Main Course, Desserts"
+                            value={section.name}
+                            onChange={(e) => {
+                              const newSections = [...qrData.menu.sections];
+                              newSections[sectionIndex].name = e.target.value;
+                              setQrData({ ...qrData, menu: { sections: newSections } });
+                            }}
+                            className="input-elevated mt-2"
+                          />
+                        </div>
+                        
+                        <div>
+                          <Label className="text-sm font-medium">Section Description</Label>
+                          <Textarea
+                            placeholder="Brief description of this menu section"
+                            value={section.description}
+                            onChange={(e) => {
+                              const newSections = [...qrData.menu.sections];
+                              newSections[sectionIndex].description = e.target.value;
+                              setQrData({ ...qrData, menu: { sections: newSections } });
+                            }}
+                            className="input-elevated mt-2 min-h-[60px]"
+                          />
+                        </div>
+                        
+                        {/* Menu Items */}
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <Label className="text-sm font-medium">Menu Items</Label>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                const newSections = [...qrData.menu.sections];
+                                newSections[sectionIndex].items.push({
+                                  id: Date.now().toString(),
+                                  name: '',
+                                  description: '',
+                                  price: ''
+                                });
+                                setQrData({ ...qrData, menu: { sections: newSections } });
+                              }}
+                              className="gap-1"
+                            >
+                              <Plus className="w-3 h-3" />
+                              Add Item
+                            </Button>
+                          </div>
+                          
+                          {section.items.map((item, itemIndex) => (
+                            <div key={item.id} className="p-3 bg-background rounded border">
+                              <div className="flex items-start justify-between mb-2">
+                                <span className="text-xs font-medium text-muted-foreground">Item {itemIndex + 1}</span>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    const newSections = [...qrData.menu.sections];
+                                    newSections[sectionIndex].items = section.items.filter((_, i) => i !== itemIndex);
+                                    setQrData({ ...qrData, menu: { sections: newSections } });
+                                  }}
+                                  className="text-destructive hover:text-destructive p-1 h-auto"
+                                >
+                                  <X className="w-3 h-3" />
+                                </Button>
+                              </div>
+                              
+                              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                <div className="md:col-span-1">
+                                  <Input
+                                    placeholder="Item name"
+                                    value={item.name}
+                                    onChange={(e) => {
+                                      const newSections = [...qrData.menu.sections];
+                                      newSections[sectionIndex].items[itemIndex].name = e.target.value;
+                                      setQrData({ ...qrData, menu: { sections: newSections } });
+                                    }}
+                                    className="text-sm"
+                                  />
+                                </div>
+                                <div className="md:col-span-1">
+                                  <Input
+                                    placeholder="Description"
+                                    value={item.description}
+                                    onChange={(e) => {
+                                      const newSections = [...qrData.menu.sections];
+                                      newSections[sectionIndex].items[itemIndex].description = e.target.value;
+                                      setQrData({ ...qrData, menu: { sections: newSections } });
+                                    }}
+                                    className="text-sm"
+                                  />
+                                </div>
+                                <div className="md:col-span-1">
+                                  <Input
+                                    placeholder="Price"
+                                    value={item.price}
+                                    onChange={(e) => {
+                                      const newSections = [...qrData.menu.sections];
+                                      newSections[sectionIndex].items[itemIndex].price = e.target.value;
+                                      setQrData({ ...qrData, menu: { sections: newSections } });
+                                    }}
+                                    className="text-sm"
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
                     </div>
-                  </Button>
+                  ))}
                   
-                  <Button variant="outline" className="h-auto p-4 justify-start">
-                    <FileText className="w-6 h-6 mr-3 text-blue-500" />
-                    <div className="text-left">
-                      <div className="font-medium">I have a PDF version of my menu</div>
-                    </div>
+                  {/* Add Section Button */}
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      const newSection = {
+                        id: Date.now().toString(),
+                        name: '',
+                        description: '',
+                        items: []
+                      };
+                      setQrData({ 
+                        ...qrData, 
+                        menu: { 
+                          sections: [...qrData.menu.sections, newSection] 
+                        } 
+                      });
+                    }}
+                    className="w-full gap-2 border-dashed"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Add Menu Section
                   </Button>
-                  
-                  <Button variant="outline" className="h-auto p-4 justify-start">
-                    <Link className="w-6 h-6 mr-3 text-blue-500" />
-                    <div className="text-left">
-                      <div className="font-medium">I have a link that redirects to my menu</div>
-                    </div>
-                  </Button>
-                </div>
-
-                <div className="space-y-4 border-t pt-4">
-                  <h4 className="font-medium">Menu Builder</h4>
-                  <div>
-                    <Label className="text-sm font-medium">Name of the section *</Label>
-                    <Input
-                      placeholder="E.g. Appetizers"
-                      className="input-elevated mt-2"
-                    />
-                  </div>
-                  <div>
-                    <Label className="text-sm font-medium">Description</Label>
-                    <Textarea
-                      placeholder="E.g. Irresistible selection of appetizers"
-                      className="input-elevated mt-2 min-h-[80px]"
-                    />
-                  </div>
                 </div>
               </div>
             )}
@@ -1769,19 +1912,32 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
 
                 {/* Interactive Color Picker */}
                 <div className="space-y-4">
-                  <Label className="text-sm font-medium">Custom Color Picker</Label>
-                  <div className="flex flex-col gap-4 p-4 bg-muted/30 dark:bg-muted/20 rounded-lg border border-border/50">
-                    <div className="w-full max-w-xs mx-auto">
-                      <HexColorPicker 
-                        color={qrStyle.fgColor} 
-                        onChange={(color) => {
-                          setQrStyle({ ...qrStyle, fgColor: color });
-                          setCurrentStep(3);
-                        }}
-                        style={{ width: '100%', height: '200px' }}
-                      />
-                    </div>
-                    <div className="flex gap-2 items-center">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-sm font-medium">Color Customization</Label>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowColorPalette(!showColorPalette)}
+                      className="gap-2"
+                    >
+                      <Palette className="w-4 h-4" />
+                      {showColorPalette ? 'Hide Palette' : 'Show Palette'}
+                    </Button>
+                  </div>
+                  
+                  {showColorPalette && (
+                    <div className="flex flex-col gap-4 p-4 bg-gradient-to-br from-muted/30 to-muted/50 rounded-lg border border-border/50 backdrop-blur-sm animate-fade-in">
+                      <div className="w-full max-w-xs mx-auto">
+                        <HexColorPicker 
+                          color={qrStyle.fgColor} 
+                          onChange={(color) => {
+                            setQrStyle({ ...qrStyle, fgColor: color });
+                            setCurrentStep(3);
+                          }}
+                          style={{ width: '100%', height: '200px' }}
+                        />
+                      </div>
+                      <div className="flex gap-2 items-center">
                       <div 
                         className="w-12 h-10 rounded border border-border"
                         style={{ backgroundColor: qrStyle.fgColor }}
@@ -1793,9 +1949,10 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
                         className="input-elevated flex-1 bg-background text-foreground"
                         placeholder="#527AC9"
                       />
-                    </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                </div>
 
                 {/* QR Frame Selection */}
                 <div className="space-y-4">
@@ -1862,14 +2019,14 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
                   <Slider
                     value={[qrStyle.size]}
                     onValueChange={(value) => setQrStyle({ ...qrStyle, size: value[0] })}
-                    max={1000}
-                    min={100}
+    max={450}
+    min={100}
                     step={10}
                     className="w-full"
                   />
                   <div className="flex justify-between text-xs text-muted-foreground">
                     <span>Small (100px)</span>
-                    <span>Large (1000px)</span>
+                    <span>Large (450px)</span>
                   </div>
                 </div>
 
