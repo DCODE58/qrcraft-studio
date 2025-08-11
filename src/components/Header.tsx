@@ -48,7 +48,7 @@ const Header = ({ showBackButton = false, onBackClick, title }: HeaderProps) => 
                 </div>
                 <div className="hidden sm:block">
                   <h1 className="text-xl font-bold bg-gradient-hero bg-clip-text text-transparent">
-                    QrCraft
+                    Qr Studio
                   </h1>
                   <p className="text-xs text-muted-foreground -mt-1">
                     Professional QR Generator

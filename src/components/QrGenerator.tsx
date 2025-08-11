@@ -8,13 +8,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Slider } from '@/components/ui/slider';
 import { 
   ArrowLeft, Download, Palette, Settings, Wifi, Phone, Mail, User, Calendar, 
   MessageSquare, Copy, Share2, Sparkles, Zap, Globe, FileText, Link, Users, 
   Video, Camera, Music, Briefcase, MapPin, Clock, Menu, Store, Ticket, Gift,
   Facebook, Instagram, Twitter, Youtube, Linkedin, Github, Chrome, Smartphone,
   Receipt, Car, Home, CreditCard, FileImage, HelpCircle, QrCode, Eye, EyeOff,
-  Lock, ImageIcon, CheckCircle
+  Lock, ImageIcon, CheckCircle, Plus, Loader2, Edit3
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Switch } from '@/components/ui/switch';
@@ -212,7 +213,10 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedColorPalette, setSelectedColorPalette] = useState('blue-green');
   const [qrFrame, setQrFrame] = useState('scan-me');
+  const [customFrameName, setCustomFrameName] = useState('Scan Me');
   const [uploadedFiles, setUploadedFiles] = useState<{[key: string]: File}>({});
+  const [socialLinks, setSocialLinks] = useState<{platform: string, url: string}[]>([]);
+  const [isGenerating, setIsGenerating] = useState(false);
   const qrCodeRef = useRef<HTMLDivElement>(null);
   const contentFormRef = useRef<HTMLDivElement>(null);
 
@@ -379,7 +383,8 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
       case 'pdf':
         return qrData.pdf;
       case 'links':
-        return qrData.links;
+        const linksText = socialLinks.map(link => `${link.platform}: ${link.url}`).join('\n');
+        return linksText || qrData.links;
       case 'business':
         return `BEGIN:VCARD\nVERSION:3.0\nORG:${qrData.business.name}\nTEL:${qrData.business.phone}\nEMAIL:${qrData.business.email}\nURL:${qrData.business.website}\nADR:${qrData.business.address}\nNOTE:${qrData.business.description}\nEND:VCARD`;
       case 'video':
@@ -387,7 +392,8 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
       case 'images':
         return qrData.images;
       case 'social':
-        return qrData.social;
+        const socialLinksText = socialLinks.map(link => `${link.platform}: ${link.url}`).join('\n');
+        return socialLinksText || qrData.social;
       case 'whatsapp':
         return `https://wa.me/${qrData.whatsapp.number}?text=${encodeURIComponent(qrData.whatsapp.message)}`;
       case 'mp3':
@@ -435,6 +441,7 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
   const downloadQR = async (format: 'png' | 'svg') => {
     if (!qrRef.current) return;
 
+    setIsGenerating(true);
     try {
       let dataUrl: string;
       
@@ -451,7 +458,7 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
       }
 
       const link = document.createElement('a');
-      link.download = `qrcraft-${qrType}-${Date.now()}.${format}`;
+      link.download = `qr-studio-${qrType}-${Date.now()}.${format}`;
       link.href = dataUrl;
       link.click();
 
@@ -465,6 +472,8 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
         description: "There was an error downloading your QR code. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -499,8 +508,8 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
 
     try {
       await navigator.share({
-        title: 'QrCraft - QR Code',
-        text: `Check out this QR code I created with QrCraft: ${getProtectedQRValue()}`,
+        title: 'Qr Studio - QR Code',
+        text: `Check out this QR code I created with Qr Studio: ${getProtectedQRValue()}`,
         url: window.location.href,
       });
     } catch (error) {
@@ -1000,37 +1009,57 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
               <div className="space-y-4">
                 <div className="border-2 border-dashed border-purple-200 dark:border-purple-800 rounded-lg p-8 text-center bg-purple-50/50 dark:bg-purple-950/20">
                   <ImageIcon className="w-12 h-12 text-purple-500 mx-auto mb-4" />
-                  <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="gallery-title" className="text-sm font-medium">Image gallery/album title</Label>
-                      <Input
-                        id="gallery-title"
-                        placeholder="E.g. My gallery"
-                        className="input-elevated mt-2 bg-background text-foreground"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="gallery-description" className="text-sm font-medium">Image gallery/album description</Label>
-                      <Textarea
-                        id="gallery-description"
-                        placeholder="E.g. Summer Pictures"
-                        className="input-elevated mt-2 min-h-[80px]"
-                      />
-                      <div className="text-xs text-muted-foreground text-right mt-1">0 / 4000</div>
-                    </div>
-                    <div>
-                      <Label htmlFor="gallery-website" className="text-sm font-medium">Website</Label>
-                      <Input
-                        id="gallery-website"
-                        placeholder="E.g. https://www.mypictures.com/"
-                        className="input-elevated mt-2 bg-background text-foreground"
-                      />
-                    </div>
-                    <Button variant="outline" className="w-full">
-                      <Sparkles className="w-4 h-4 mr-2" />
-                      Add Button
-                    </Button>
-                  </div>
+                 <div className="space-y-4">
+                   <div>
+                     <Label htmlFor="gallery-title" className="text-sm font-medium">Image gallery/album title</Label>
+                     <Input
+                       id="gallery-title"
+                       placeholder="E.g. My gallery"
+                       className="input-elevated mt-2 bg-background text-foreground"
+                     />
+                   </div>
+                   <div>
+                     <Label htmlFor="gallery-description" className="text-sm font-medium">Image gallery/album description</Label>
+                     <Textarea
+                       id="gallery-description"
+                       placeholder="E.g. Summer Pictures"
+                       className="input-elevated mt-2 min-h-[80px]"
+                     />
+                     <div className="text-xs text-muted-foreground text-right mt-1">0 / 4000</div>
+                   </div>
+                   <div>
+                     <Label htmlFor="gallery-website" className="text-sm font-medium">Website</Label>
+                     <Input
+                       id="gallery-website"
+                       placeholder="E.g. https://www.mypictures.com/"
+                       className="input-elevated mt-2 bg-background text-foreground"
+                     />
+                   </div>
+                   
+                   {/* Image Upload Section */}
+                   <div className="mt-4">
+                     <input
+                       type="file"
+                       accept="image/*"
+                       multiple
+                       onChange={(e) => {
+                         const files = Array.from(e.target.files || []);
+                         files.forEach(file => handleFileUpload(file, 'images'));
+                       }}
+                       className="hidden"
+                       id="image-upload"
+                     />
+                     <Button 
+                       variant="outline" 
+                       onClick={() => document.getElementById('image-upload')?.click()}
+                       className="w-full"
+                     >
+                       <ImageIcon className="w-4 h-4 mr-2" />
+                       Upload Images
+                     </Button>
+                     <p className="text-xs text-muted-foreground mt-1 text-center">Upload multiple images (JPG, PNG, GIF)</p>
+                   </div>
+                 </div>
                 </div>
               </div>
             )}
@@ -1104,25 +1133,112 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
                     className="input-elevated mt-2 min-h-[80px]"
                   />
                 </div>
-                <Button variant="outline" className="w-full">
-                  <Sparkles className="w-4 h-4 mr-2" />
-                  Add Link
-                </Button>
+                
+                {/* Social Media Links */}
+                <div className="space-y-3">
+                  <Label className="text-sm font-medium">Social Media Links</Label>
+                  {socialLinks.map((link, index) => (
+                    <div key={index} className="flex gap-2">
+                      <Select value={link.platform} onValueChange={(value) => {
+                        const newLinks = [...socialLinks];
+                        newLinks[index].platform = value;
+                        setSocialLinks(newLinks);
+                      }}>
+                        <SelectTrigger className="w-32">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="instagram">Instagram</SelectItem>
+                          <SelectItem value="facebook">Facebook</SelectItem>
+                          <SelectItem value="twitter">Twitter/X</SelectItem>
+                          <SelectItem value="linkedin">LinkedIn</SelectItem>
+                          <SelectItem value="youtube">YouTube</SelectItem>
+                          <SelectItem value="github">GitHub</SelectItem>
+                          <SelectItem value="snapchat">Snapchat</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Input
+                        placeholder="https://..."
+                        value={link.url}
+                        onChange={(e) => {
+                          const newLinks = [...socialLinks];
+                          newLinks[index].url = e.target.value;
+                          setSocialLinks(newLinks);
+                        }}
+                        className="flex-1"
+                      />
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => setSocialLinks(socialLinks.filter((_, i) => i !== index))}
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  ))}
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setSocialLinks([...socialLinks, { platform: 'instagram', url: '' }])}
+                    className="w-full"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Social Link
+                  </Button>
+                </div>
               </div>
             )}
 
             {qrType === 'social' && (
               <div className="space-y-4">
-                <div>
-                  <Label htmlFor="social-url" className="text-sm font-medium">Social Media URL</Label>
-                  <Input
-                    id="social-url"
-                    type="url"
-                    placeholder="https://instagram.com/username"
-                    value={qrData.social}
-                    onChange={(e) => setQrData({ ...qrData, social: e.target.value })}
-                    className="input-elevated mt-2"
-                  />
+                <div className="space-y-3">
+                  <Label className="text-sm font-medium">Social Media Links</Label>
+                  {socialLinks.map((link, index) => (
+                    <div key={index} className="flex gap-2">
+                      <Select value={link.platform} onValueChange={(value) => {
+                        const newLinks = [...socialLinks];
+                        newLinks[index].platform = value;
+                        setSocialLinks(newLinks);
+                      }}>
+                        <SelectTrigger className="w-32">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="instagram">Instagram</SelectItem>
+                          <SelectItem value="facebook">Facebook</SelectItem>
+                          <SelectItem value="twitter">Twitter/X</SelectItem>
+                          <SelectItem value="linkedin">LinkedIn</SelectItem>
+                          <SelectItem value="youtube">YouTube</SelectItem>
+                          <SelectItem value="github">GitHub</SelectItem>
+                          <SelectItem value="snapchat">Snapchat</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Input
+                        placeholder="https://..."
+                        value={link.url}
+                        onChange={(e) => {
+                          const newLinks = [...socialLinks];
+                          newLinks[index].url = e.target.value;
+                          setSocialLinks(newLinks);
+                        }}
+                        className="flex-1"
+                      />
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => setSocialLinks(socialLinks.filter((_, i) => i !== index))}
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  ))}
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setSocialLinks([...socialLinks, { platform: 'instagram', url: '' }])}
+                    className="w-full"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Social Link
+                  </Button>
                 </div>
               </div>
             )}
@@ -1550,7 +1666,7 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
                 <QrCode className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h1 className="text-xl font-bold">QrCraft</h1>
+                <h1 className="text-xl font-bold">Qr Studio</h1>
                 <p className="text-sm text-muted-foreground">Professional QR Generator</p>
               </div>
             </div>
@@ -1682,7 +1798,7 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
                 {/* QR Frame Selection */}
                 <div className="space-y-4">
                   <Label className="text-sm font-medium">QR Frame Style</Label>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-3 gap-3">
                     <button
                       onClick={() => setQrFrame('scan-me')}
                       className={`p-4 border-2 rounded-lg text-center transition-all ${
@@ -1695,6 +1811,17 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
                       <div className="text-xs text-muted-foreground mt-1">Classic frame</div>
                     </button>
                     <button
+                      onClick={() => setQrFrame('rounded')}
+                      className={`p-4 border-2 rounded-lg text-center transition-all ${
+                        qrFrame === 'rounded' 
+                          ? 'border-primary bg-primary/5' 
+                          : 'border-border hover:border-primary/50'
+                      }`}
+                    >
+                      <div className="text-sm font-medium">Rounded</div>
+                      <div className="text-xs text-muted-foreground mt-1">Modern frame</div>
+                    </button>
+                    <button
                       onClick={() => setQrFrame('custom')}
                       className={`p-4 border-2 rounded-lg text-center transition-all ${
                         qrFrame === 'custom' 
@@ -1703,41 +1830,63 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
                       }`}
                     >
                       <div className="text-sm font-medium">Custom</div>
-                      <div className="text-xs text-muted-foreground mt-1">Customizable frame</div>
+                      <div className="text-xs text-muted-foreground mt-1">Your own text</div>
                     </button>
+                  </div>
+                  
+                  {/* Custom Frame Name Input */}
+                  {qrFrame === 'custom' && (
+                    <div className="mt-3">
+                      <Label htmlFor="custom-frame-name" className="text-sm font-medium">Custom Frame Text</Label>
+                      <div className="flex gap-2 mt-2">
+                        <Input
+                          id="custom-frame-name"
+                          placeholder="Enter custom text..."
+                          value={customFrameName}
+                          onChange={(e) => setCustomFrameName(e.target.value)}
+                          className="input-elevated flex-1"
+                        />
+                        <Button variant="outline" size="sm">
+                          <Edit3 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* QR Code Size Slider */}
+                <div className="space-y-4">
+                  <Label className="text-sm font-medium">QR Code Size: {qrStyle.size}px</Label>
+                  <Slider
+                    value={[qrStyle.size]}
+                    onValueChange={(value) => setQrStyle({ ...qrStyle, size: value[0] })}
+                    max={1000}
+                    min={100}
+                    step={10}
+                    className="w-full"
+                  />
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>Small (100px)</span>
+                    <span>Large (1000px)</span>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="size" className="text-sm font-medium">Size (px)</Label>
-                    <Input
-                      id="size"
-                      type="number"
-                      min="100"
-                      max="1000"
-                      value={qrStyle.size}
-                      onChange={(e) => setQrStyle({ ...qrStyle, size: parseInt(e.target.value) || 280 })}
-                      className="input-elevated mt-2"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="level" className="text-sm font-medium">Error Correction</Label>
-                    <Select 
-                      value={qrStyle.level} 
-                      onValueChange={(value: 'L' | 'M' | 'Q' | 'H') => setQrStyle({ ...qrStyle, level: value })}
-                    >
-                      <SelectTrigger className="input-elevated mt-2">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="L">Low (~7%)</SelectItem>
-                        <SelectItem value="M">Medium (~15%)</SelectItem>
-                        <SelectItem value="Q">Quartile (~25%)</SelectItem>
-                        <SelectItem value="H">High (~30%)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                <div>
+                  <Label htmlFor="level" className="text-sm font-medium">Error Correction</Label>
+                  <Select 
+                    value={qrStyle.level} 
+                    onValueChange={(value: 'L' | 'M' | 'Q' | 'H') => setQrStyle({ ...qrStyle, level: value })}
+                  >
+                    <SelectTrigger className="input-elevated mt-2">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="L">Low (~7%)</SelectItem>
+                      <SelectItem value="M">Medium (~15%)</SelectItem>
+                      <SelectItem value="Q">Quartile (~25%)</SelectItem>
+                      <SelectItem value="H">High (~30%)</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </Card>
@@ -1797,7 +1946,15 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
                     {qrFrame === 'custom' && qrValue && (
                       <div className="text-center mt-4">
                         <span className="inline-block px-3 py-1 bg-secondary text-secondary-foreground text-sm font-medium rounded-full">
-                          Custom Frame
+                          {customFrameName || 'Scan Me'}
+                        </span>
+                      </div>
+                    )}
+                    
+                    {qrFrame === 'rounded' && qrValue && (
+                      <div className="text-center mt-4">
+                        <span className="inline-block px-3 py-1 bg-gradient-to-r from-primary to-accent text-white text-sm font-medium rounded-full">
+                          Scan QR Code
                         </span>
                       </div>
                     )}
@@ -1818,12 +1975,29 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
                     </div>
 
                     <div className="flex flex-wrap gap-2 justify-center">
-                      <Button onClick={() => downloadQR('png')} className="gap-2 btn-primary">
-                        <Download className="w-4 h-4" />
+                      <Button 
+                        onClick={() => downloadQR('png')} 
+                        className="gap-2 btn-primary"
+                        disabled={isGenerating}
+                      >
+                        {isGenerating ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Download className="w-4 h-4" />
+                        )}
                         Download PNG
                       </Button>
-                      <Button onClick={() => downloadQR('svg')} variant="outline" className="gap-2">
-                        <Download className="w-4 h-4" />
+                      <Button 
+                        onClick={() => downloadQR('svg')} 
+                        variant="outline" 
+                        className="gap-2"
+                        disabled={isGenerating}
+                      >
+                        {isGenerating ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Download className="w-4 h-4" />
+                        )}
                         Download SVG
                       </Button>
                     </div>
