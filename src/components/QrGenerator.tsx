@@ -2113,8 +2113,32 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
                     
                     {qrFrame === 'rounded' && qrValue && (
                       <div className="text-center mt-4">
-                        <span className="inline-block px-3 py-1 bg-gradient-to-r from-primary to-accent text-white text-sm font-medium rounded-full">
+                        <span className="inline-block px-4 py-2 bg-gradient-to-r from-primary to-accent text-white text-sm font-medium rounded-full shadow-lg">
                           Scan QR Code
+                        </span>
+                      </div>
+                    )}
+                    
+                    {qrFrame === 'elegant' && qrValue && (
+                      <div className="text-center mt-4">
+                        <span className="inline-block px-4 py-2 bg-slate-800 text-white text-sm font-medium rounded-sm tracking-wide uppercase shadow-md">
+                          QR Code
+                        </span>
+                      </div>
+                    )}
+                    
+                    {qrFrame === 'minimal' && qrValue && (
+                      <div className="text-center mt-4">
+                        <span className="inline-block px-3 py-1 border border-gray-300 text-gray-700 text-xs font-normal rounded">
+                          SCAN
+                        </span>
+                      </div>
+                    )}
+                    
+                    {qrFrame === 'corporate' && qrValue && (
+                      <div className="text-center mt-4">
+                        <span className="inline-block px-4 py-2 bg-blue-900 text-white text-sm font-semibold rounded shadow-sm">
+                          QR STUDIO
                         </span>
                       </div>
                     )}

@@ -29,8 +29,8 @@ const PasswordProtected = () => {
         setError('Invalid protected QR code data');
       }
     } else {
-      // For testing purposes, if no hash is provided, show error
-      setError('No protected QR code data found');
+      // If no hash is provided, it's not a protected QR code
+      setError('This page is for password-protected QR codes only');
     }
   }, [location]);
 
@@ -116,15 +116,36 @@ const PasswordProtected = () => {
     });
   };
 
-  if (!protectedData) {
+  if (!protectedData && !error) {
+    return (
+      <div className="min-h-screen bg-gradient-subtle flex items-center justify-center p-4">
+        <Card className="w-full max-w-md p-8 text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <h1 className="text-xl font-semibold mb-2">Loading...</h1>
+          <p className="text-muted-foreground">
+            Processing protected QR code data...
+          </p>
+        </Card>
+      </div>
+    );
+  }
+
+  if (!protectedData || error) {
     return (
       <div className="min-h-screen bg-gradient-subtle flex items-center justify-center p-4">
         <Card className="w-full max-w-md p-8 text-center">
           <AlertCircle className="w-12 h-12 text-destructive mx-auto mb-4" />
           <h1 className="text-xl font-semibold mb-2">Invalid QR Code</h1>
-          <p className="text-muted-foreground">
-            This protected QR code data appears to be invalid or corrupted.
+          <p className="text-muted-foreground mb-4">
+            {error || "This protected QR code data appears to be invalid or corrupted."}
           </p>
+          <Button 
+            onClick={() => window.location.href = '/'}
+            variant="outline"
+            className="w-full"
+          >
+            Go to QR Studio
+          </Button>
         </Card>
       </div>
     );
