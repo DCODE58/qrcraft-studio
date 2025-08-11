@@ -69,8 +69,8 @@ const PwaInstallButton = () => {
     setIsVisible(false);
   };
 
-  // Show button if prompt is available OR if we want to show fallback instructions
-  if (!isVisible && !deferredPrompt) return null;
+  // Always show the install button
+  if (!isVisible) return null;
 
   return (
     <Button 

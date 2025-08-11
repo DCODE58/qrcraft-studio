@@ -18,6 +18,7 @@ import {
   Lock, ImageIcon, CheckCircle, Plus, Loader2, Edit3, X
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { toast as sonnerToast } from 'sonner';
 import { Switch } from '@/components/ui/switch';
 
 type QRType = 'text' | 'url' | 'email' | 'phone' | 'sms' | 'wifi' | 'vcard' | 'event' | 
@@ -486,16 +487,16 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
       link.href = dataUrl;
       link.click();
 
-      toast({
-        title: "✨ QR Code Downloaded!",
+      sonnerToast.success("✨ QR Code Downloaded!", {
         description: `Your ${qrType.toUpperCase()} QR code has been saved as ${format.toUpperCase()}.`,
-        className: "bg-gradient-to-r from-green-50 to-emerald-50 border-green-200",
+        position: "top-center",
+        duration: 3000,
       });
     } catch (error) {
-      toast({
-        title: "Download Failed",
+      sonnerToast.error("Download Failed", {
         description: "There was an error downloading your QR code. Please try again.",
-        variant: "destructive",
+        position: "top-center",
+        duration: 4000,
       });
     } finally {
       setIsGenerating(false);
