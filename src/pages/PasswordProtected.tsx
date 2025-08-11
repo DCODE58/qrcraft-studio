@@ -44,8 +44,17 @@ const PasswordProtected = () => {
           description: "QR code content unlocked successfully.",
         });
         
-        // Display the protected content
-        window.location.href = protectedData.content;
+        // Display the protected content based on type
+        if (protectedData.type === 'url' && protectedData.content.startsWith('http')) {
+          window.open(protectedData.content, '_blank');
+        } else {
+          // For other content types, display in a new window or copy to clipboard
+          navigator.clipboard.writeText(protectedData.content);
+          toast({
+            title: "Content Copied!",
+            description: "The protected content has been copied to your clipboard.",
+          });
+        }
       } else {
         setError('Incorrect password. Please try again.');
         toast({

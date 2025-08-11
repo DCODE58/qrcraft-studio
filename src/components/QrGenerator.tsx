@@ -261,9 +261,11 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
   // Auto-scroll to content form when type is selected
   const scrollToContentForm = () => {
     if (contentFormRef.current) {
-      contentFormRef.current.scrollIntoView({ 
-        behavior: 'smooth', 
-        block: 'start' 
+      const headerHeight = 80; // Account for header height
+      const elementTop = contentFormRef.current.offsetTop - headerHeight;
+      window.scrollTo({ 
+        top: elementTop, 
+        behavior: 'smooth' 
       });
     }
   };
@@ -272,10 +274,10 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
   const handleQRTypeSelect = (type: QRType) => {
     setQrType(type);
     setCurrentStep(2);
-    // Delay scroll to ensure the content form is rendered
+    // Delay scroll to ensure the content form is rendered and DOM updated
     setTimeout(() => {
       scrollToContentForm();
-    }, 100);
+    }, 150);
   };
 
   // Handle file upload
@@ -433,7 +435,7 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
         password: password,
         type: qrType
       }));
-      return `${window.location.origin}#protected=${encodedData}`;
+      return `${window.location.origin}/password-protected#protected=${encodedData}`;
     }
     return baseValue;
   };
