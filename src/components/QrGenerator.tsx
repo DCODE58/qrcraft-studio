@@ -2019,14 +2019,14 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
                   <Slider
                     value={[qrStyle.size]}
                     onValueChange={(value) => setQrStyle({ ...qrStyle, size: value[0] })}
-    max={450}
+    max={400}
     min={100}
                     step={10}
                     className="w-full"
                   />
                   <div className="flex justify-between text-xs text-muted-foreground">
                     <span>Small (100px)</span>
-                    <span>Large (450px)</span>
+                    <span>Large (400px)</span>
                   </div>
                 </div>
 

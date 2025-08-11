@@ -5,6 +5,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CookieConsent from "@/components/CookieConsent";
 import PwaInstallPrompt from "@/components/PwaInstallPrompt";
+import PwaInstallButton from "@/components/PwaInstallButton";
 import { useState } from "react";
 import heroImage from "@/assets/hero-image.jpg";
 
@@ -52,6 +53,7 @@ const Index = () => {
                 <QrCode className="w-4 h-4 sm:w-5 sm:h-5 mr-2 group-hover:rotate-12 transition-transform duration-200" />
                 Generate QR Code
               </Button>
+              <PwaInstallButton />
             </div>
 
             {/* Social Proof */}
@@ -160,29 +162,6 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Statistics Section */}
-      <section className="py-12 sm:py-16 bg-gradient-hero text-white">
-        <div className="container mx-auto px-4 sm:px-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-8 text-center">
-            <div className="space-y-1 sm:space-y-2">
-              <div className="text-2xl sm:text-3xl md:text-4xl font-bold">10,000+</div>
-              <div className="text-white/80 text-xs sm:text-sm">QR Codes Generated</div>
-            </div>
-            <div className="space-y-1 sm:space-y-2">
-              <div className="text-2xl sm:text-3xl md:text-4xl font-bold">50+</div>
-              <div className="text-white/80 text-xs sm:text-sm">Countries</div>
-            </div>
-            <div className="space-y-1 sm:space-y-2">
-              <div className="text-2xl sm:text-3xl md:text-4xl font-bold">99.9%</div>
-              <div className="text-white/80 text-xs sm:text-sm">Uptime</div>
-            </div>
-            <div className="space-y-1 sm:space-y-2">
-              <div className="text-2xl sm:text-3xl md:text-4xl font-bold">4.9★</div>
-              <div className="text-white/80 text-xs sm:text-sm">User Rating</div>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* CTA Section */}
       <section className="py-12 sm:py-16 lg:py-24 bg-gradient-subtle">
