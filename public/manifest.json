@@ -14,13 +14,13 @@
       "type": "image/x-icon"
     },
     {
-      "src": "/qr-studio-icon-192.png",
+      "src": "/src/assets/qr-studio-icon.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/qr-studio-icon-512.png",
+      "src": "/src/assets/qr-studio-icon.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"

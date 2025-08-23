@@ -5,7 +5,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CookieConsent from "@/components/CookieConsent";
 import PwaInstallPrompt from "@/components/PwaInstallPrompt";
-
+import PwaInstallButton from "@/components/PwaInstallButton";
 import { useState } from "react";
 import heroImage from "@/assets/hero-image.jpg";
 
@@ -45,7 +45,7 @@ const Index = () => {
               <span className="text-primary font-semibold"> powerful features</span>.
             </p>
             
-            <div className="flex justify-center pt-6">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-6">
               <Button 
                 onClick={() => setShowGenerator(true)}
                 className="btn-premium text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 h-auto group w-full sm:w-auto max-w-xs"
@@ -53,6 +53,7 @@ const Index = () => {
                 <QrCode className="w-4 h-4 sm:w-5 sm:h-5 mr-2 group-hover:rotate-12 transition-transform duration-200" />
                 Generate QR Code
               </Button>
+              <PwaInstallButton />
             </div>
 
             {/* Social Proof */}

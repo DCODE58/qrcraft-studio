@@ -1,8 +1,9 @@
 const CACHE_NAME = 'qr-studio-v1';
 const urlsToCache = [
   '/',
-  '/manifest.json',
-  '/favicon.ico'
+  '/src/main.tsx',
+  '/src/index.css',
+  '/manifest.json'
 ];
 
 self.addEventListener('install', (event) => {
