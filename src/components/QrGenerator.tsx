@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { toPng, toSvg } from 'html-to-image';
 import { HexColorPicker } from 'react-colorful';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -9,22 +10,24 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
+import { Switch } from '@/components/ui/switch';
 import { 
   ArrowLeft, Download, Palette, Settings, Wifi, Phone, Mail, User, Calendar, 
   MessageSquare, Copy, Share2, Sparkles, Zap, Globe, FileText, Link, Users, 
   Video, Camera, Music, Briefcase, MapPin, Clock, Menu, Store, Ticket, Gift,
   Facebook, Instagram, Twitter, Youtube, Linkedin, Github, Chrome, Smartphone,
   Receipt, Car, Home, CreditCard, FileImage, HelpCircle, QrCode, Eye, EyeOff,
-  Lock, ImageIcon, CheckCircle, Plus, Loader2, Edit3, X
+  Lock, ImageIcon, CheckCircle, Plus, Loader2, Edit3, X, Upload, AlertCircle
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { toast as sonnerToast } from 'sonner';
-import { Switch } from '@/components/ui/switch';
+import { supabase } from '@/integrations/supabase/client';
+import * as bcrypt from 'bcryptjs';
 
 type QRType = 'text' | 'url' | 'email' | 'phone' | 'sms' | 'wifi' | 'vcard' | 'event' | 
              'pdf' | 'links' | 'business' | 'video' | 'images' | 'social' | 'whatsapp' | 
              'mp3' | 'menu' | 'apps' | 'coupon' | 'facebook' | 'instagram' | 'twitter' | 
-             'linkedin' | 'youtube' | 'location' | 'crypto';
+             'linkedin' | 'youtube' | 'location' | 'crypto' | 'media-image' | 'media-video';
 
 interface QRData {
   text: string;
@@ -233,6 +236,8 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
   const [socialLinks, setSocialLinks] = useState<{platform: string, url: string}[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [showColorPalette, setShowColorPalette] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const qrCodeRef = useRef<HTMLDivElement>(null);
   const contentFormRef = useRef<HTMLDivElement>(null);
 
@@ -250,12 +255,14 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
 
   const qrTypeConfigs = [
     { type: 'url' as QRType, label: 'Website', icon: Globe, color: 'text-blue-500', description: 'Link to any website URL' },
+    { type: 'media-image' as QRType, label: 'Image Upload', icon: Camera, color: 'text-orange-500', description: 'Upload and share images (1h expiry)' },
+    { type: 'media-video' as QRType, label: 'Video Upload', icon: Video, color: 'text-pink-500', description: 'Upload and share videos (1h expiry)' },
     { type: 'pdf' as QRType, label: 'PDF', icon: FileText, color: 'text-red-500', description: 'Show a PDF document' },
     { type: 'links' as QRType, label: 'List of Links', icon: Link, color: 'text-purple-500', description: 'Share multiple links' },
     { type: 'vcard' as QRType, label: 'vCard', icon: User, color: 'text-green-500', description: 'Share digital business card' },
     { type: 'business' as QRType, label: 'Business', icon: Briefcase, color: 'text-indigo-500', description: 'Share information about your business' },
-    { type: 'video' as QRType, label: 'Video', icon: Video, color: 'text-pink-500', description: 'Show a video' },
-    { type: 'images' as QRType, label: 'Images', icon: Camera, color: 'text-orange-500', description: 'Share multiple images' },
+    { type: 'video' as QRType, label: 'Video Link', icon: Video, color: 'text-pink-500', description: 'Share a video URL' },
+    { type: 'images' as QRType, label: 'Image Gallery', icon: ImageIcon, color: 'text-orange-500', description: 'Share multiple image URLs' },
     { type: 'facebook' as QRType, label: 'Facebook', icon: Facebook, color: 'text-blue-600', description: 'Share your Facebook page' },
     { type: 'instagram' as QRType, label: 'Instagram', icon: Instagram, color: 'text-pink-600', description: 'Share your Instagram' },
     { type: 'social' as QRType, label: 'Social Media', icon: Users, color: 'text-cyan-500', description: 'Share your social channels' },
@@ -264,7 +271,7 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
     { type: 'menu' as QRType, label: 'Menu', icon: Menu, color: 'text-teal-500', description: 'Create a restaurant menu' },
     { type: 'apps' as QRType, label: 'Apps', icon: Smartphone, color: 'text-gray-600', description: 'Redirect to an app store' },
     { type: 'coupon' as QRType, label: 'Coupon', icon: Gift, color: 'text-amber-500', description: 'Share a coupon' },
-    { type: 'wifi' as QRType, label: 'WiFi', icon: Wifi, color: 'text-blue-400', description: 'Connect to a Wi-Fi network' },
+    { type: 'wifi' as QRType, label: 'WiFi', icon: Wifi, color: 'text-blue-400', description: 'Connect to WiFi (supports hidden networks)' },
     { type: 'text' as QRType, label: 'Text', icon: MessageSquare, color: 'text-gray-700', description: 'Plain text content' },
     { type: 'email' as QRType, label: 'Email', icon: Mail, color: 'text-red-400', description: 'Send an email' },
     { type: 'phone' as QRType, label: 'Phone', icon: Phone, color: 'text-green-400', description: 'Make a phone call' },
@@ -294,6 +301,85 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
     setTimeout(() => {
       scrollToContentForm();
     }, 150);
+  };
+
+  // Handle file upload for media
+  const handleMediaUpload = async (file: File, type: 'image' | 'video') => {
+    if (!file) return;
+
+    // Validate file size (max 50MB for videos, 10MB for images)
+    const maxSize = type === 'video' ? 50 * 1024 * 1024 : 10 * 1024 * 1024;
+    if (file.size > maxSize) {
+      toast({
+        title: "File too large",
+        description: `${type === 'video' ? 'Videos' : 'Images'} must be less than ${type === 'video' ? '50MB' : '10MB'}`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate file type
+    const validTypes = type === 'image' 
+      ? ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+      : ['video/mp4', 'video/webm', 'video/mov'];
+    
+    if (!validTypes.includes(file.type)) {
+      toast({
+        title: "Invalid file type",
+        description: `Please select a valid ${type} file`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsUploading(true);
+    setUploadProgress(0);
+
+    try {
+      const bucketName = type === 'image' ? 'images' : 'videos';
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}-${file.name}`;
+      const filePath = `uploads/${fileName}`;
+
+      // Upload file to Supabase Storage
+      const { error: uploadError } = await supabase.storage
+        .from(bucketName)
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (uploadError) {
+        throw new Error(uploadError.message);
+      }
+
+      // Set the media URL to point to our viewer
+      const mediaUrl = `${window.location.origin}/view/${bucketName}/${encodeURIComponent(filePath)}`;
+      
+      if (type === 'image') {
+        setQrData({ ...qrData, images: mediaUrl });
+      } else {
+        setQrData({ ...qrData, video: { ...qrData.video, url: mediaUrl } });
+      }
+
+      toast({
+        title: "📁 Upload Successful!",
+        description: `${type.charAt(0).toUpperCase() + type.slice(1)} uploaded and will be available for 1 hour.`,
+        className: "bg-gradient-to-r from-emerald-50 to-green-50 border-emerald-200",
+      });
+
+      setCurrentStep(3); // Move to design step
+
+    } catch (error: any) {
+      console.error('Upload error:', error);
+      toast({
+        title: "Upload failed",
+        description: error.message || "Failed to upload file. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploading(false);
+      setUploadProgress(0);
+    }
   };
 
   // Handle file upload
@@ -410,6 +496,10 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
         return qrData.video.url || `Video: ${qrData.video.title}\nDescription: ${qrData.video.description}\nTag: ${qrData.video.customTag}`;
       case 'images':
         return qrData.images;
+      case 'media-image':
+        return qrData.images;
+      case 'media-video':
+        return qrData.video.url;
       case 'social':
         const socialLinksText = socialLinks.map(link => `${link.platform}: ${link.url}`).join('\n');
         return socialLinksText || qrData.social;
@@ -449,16 +539,46 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
   };
 
   // Generate protected QR value with password if enabled
-  const getProtectedQRValue = (): string => {
+  const getProtectedQRValue = async (): Promise<string> => {
+    const baseValue = generateQRValue();
+    
+    if (hasPassword && password && baseValue) {
+      try {
+        // Create password-protected QR via edge function
+        const { data, error } = await supabase.functions.invoke('createPasswordQR', {
+          body: { 
+            password: password.trim(),
+            contentUrl: baseValue,
+            qrType: qrType,
+            expiresIn: 24 * 60 * 60 // 24 hours
+          }
+        });
+
+        if (error || !data.success) {
+          throw new Error(data?.error || 'Failed to create secure QR');
+        }
+
+        return `${window.location.origin}/secure/${data.qrId}`;
+      } catch (error) {
+        console.error('Error creating protected QR:', error);
+        toast({
+          title: "Security Error",
+          description: "Failed to create password protection. Using standard QR.",
+          variant: "destructive",
+        });
+        return baseValue;
+      }
+    }
+    
+    return baseValue;
+  };
+
+  // Synchronous version for immediate display
+  const getProtectedQRValueSync = (): string => {
     const baseValue = generateQRValue();
     if (hasPassword && password) {
-      // Create a simple protection page URL with encoded data
-      const encodedData = btoa(JSON.stringify({
-        content: baseValue,
-        password: password,
-        type: qrType
-      }));
-      return `${window.location.origin}/password-protected#protected=${encodedData}`;
+      // Return a placeholder URL that will be updated async
+      return `${window.location.origin}/secure/generating...`;
     }
     return baseValue;
   };
@@ -504,7 +624,7 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
   };
 
   const copyQRValue = async () => {
-    const value = getProtectedQRValue();
+    const value = await getProtectedQRValue();
     if (!value) return;
 
     try {
@@ -642,6 +762,69 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
               </div>
             )}
 
+            {(qrType === 'media-image' || qrType === 'media-video') && (
+              <div className="space-y-4">
+                <div className="border-2 border-dashed border-primary/20 rounded-lg p-8 text-center bg-primary/5">
+                  {qrType === 'media-image' ? (
+                    <Camera className="w-12 h-12 text-primary mx-auto mb-4" />
+                  ) : (
+                    <Video className="w-12 h-12 text-primary mx-auto mb-4" />
+                  )}
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Upload {qrType === 'media-image' ? 'an image' : 'a video'} file (1 hour expiry)
+                  </p>
+                  <p className="text-xs text-muted-foreground mb-4">
+                    Max size: {qrType === 'media-image' ? '10MB' : '50MB'} • 
+                    Formats: {qrType === 'media-image' ? 'JPG, PNG, GIF, WebP' : 'MP4, WebM, MOV'}
+                  </p>
+                  
+                  {isUploading ? (
+                    <div className="space-y-2">
+                      <Loader2 className="w-6 h-6 animate-spin mx-auto text-primary" />
+                      <p className="text-sm text-primary">Uploading...</p>
+                    </div>
+                  ) : (
+                    <>
+                      <input
+                        type="file"
+                        accept={qrType === 'media-image' ? 'image/*' : 'video/*'}
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            handleMediaUpload(file, qrType === 'media-image' ? 'image' : 'video');
+                          }
+                        }}
+                        className="hidden"
+                        id="media-upload"
+                      />
+                      <Button 
+                        variant="outline" 
+                        onClick={() => document.getElementById('media-upload')?.click()}
+                        className="btn-primary"
+                      >
+                        <Upload className="w-4 h-4 mr-2" />
+                        Choose {qrType === 'media-image' ? 'Image' : 'Video'}
+                      </Button>
+                    </>
+                  )}
+                </div>
+                
+                {((qrData.images && qrType === 'media-image') || (qrData.video.url && qrType === 'media-video')) && (
+                  <div className="p-4 bg-success/10 border border-success/20 rounded-lg">
+                    <div className="flex items-center gap-2 text-success">
+                      <CheckCircle className="w-4 h-4" />
+                      <span className="text-sm font-medium">
+                        {qrType === 'media-image' ? 'Image' : 'Video'} uploaded successfully!
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Access will expire in 1 hour after first viewing.
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
             {qrType === 'wifi' && (
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -673,26 +856,39 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
                     />
                   </div>
                 </div>
-                <div>
-                  <Label htmlFor="security" className="text-sm font-medium">Security Type</Label>
-                  <Select 
-                    value={qrData.wifi.security} 
-                    onValueChange={(value: 'WPA' | 'WEP' | 'nopass') => 
-                      setQrData({ 
-                        ...qrData, 
-                        wifi: { ...qrData.wifi, security: value }
-                      })
-                    }
-                  >
-                    <SelectTrigger className="input-elevated mt-2">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="WPA">WPA/WPA2</SelectItem>
-                      <SelectItem value="WEP">WEP</SelectItem>
-                      <SelectItem value="nopass">No Password</SelectItem>
-                    </SelectContent>
-                  </Select>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="security" className="text-sm font-medium">Security Type</Label>
+                    <Select 
+                      value={qrData.wifi.security} 
+                      onValueChange={(value: 'WPA' | 'WEP' | 'nopass') => 
+                        setQrData({ 
+                          ...qrData, 
+                          wifi: { ...qrData.wifi, security: value }
+                        })
+                      }
+                    >
+                      <SelectTrigger className="input-elevated mt-2">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="WPA">WPA/WPA2</SelectItem>
+                        <SelectItem value="WEP">WEP</SelectItem>
+                        <SelectItem value="nopass">No Password</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex items-center space-x-2 pt-7">
+                    <Switch
+                      id="hidden"
+                      checked={qrData.wifi.hidden}
+                      onCheckedChange={(checked) => setQrData({
+                        ...qrData,
+                        wifi: { ...qrData.wifi, hidden: checked }
+                      })}
+                    />
+                    <Label htmlFor="hidden" className="text-sm font-medium">Hidden Network</Label>
+                  </div>
                 </div>
               </div>
             )}
@@ -2084,7 +2280,7 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
                     
                     {qrValue ? (
                       <QRCodeSVG
-                        value={getProtectedQRValue()}
+                        value={getProtectedQRValueSync()}
                         size={qrStyle.size}
                         fgColor={qrStyle.fgColor}
                         bgColor={qrStyle.bgColor}

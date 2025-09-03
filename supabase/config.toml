@@ -1,1 +1,10 @@
 project_id = "jefpfwrwlcphqgphdbrj"
+
+[functions.verifyPassword]
+verify_jwt = false
+
+[functions.getSignedUrl]
+verify_jwt = false
+
+[functions.createPasswordQR]
+verify_jwt = false
