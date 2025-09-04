@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
+import { toPng, toSvg } from 'html-to-image';
 import { HexColorPicker } from 'react-colorful';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
@@ -21,6 +22,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { toast as sonnerToast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import * as bcrypt from 'bcryptjs';
 
 type QRType = 'text' | 'url' | 'email' | 'phone' | 'sms' | 'wifi' | 'vcard' | 'event' | 
              'pdf' | 'links' | 'business' | 'video' | 'images' | 'social' | 'whatsapp' | 
@@ -542,27 +544,21 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
     
     if (hasPassword && password && baseValue) {
       try {
-        console.log('Creating protected QR with RPC function');
-        
-        // Use Supabase RPC function to create password-protected QR
-        const { data, error } = await supabase.rpc('create_qr_code', {
-          password_text: password.trim(),
-          content_url_param: baseValue,
-          qr_type_param: qrType,
-          expires_in_seconds: null
+        // Create password-protected QR via edge function
+        const { data, error } = await supabase.functions.invoke('createPasswordQR', {
+          body: { 
+            password: password.trim(),
+            contentUrl: baseValue,
+            qrType: qrType,
+            expiresIn: 24 * 60 * 60 // 24 hours
+          }
         });
 
-        if (error) {
-          console.error('Error creating protected QR:', error);
-          throw new Error('Failed to create secure QR');
+        if (error || !data.success) {
+          throw new Error(data?.error || 'Failed to create secure QR');
         }
 
-        if (!data || data.length === 0) {
-          throw new Error('No data returned from QR creation');
-        }
-
-        const result = data[0];
-        return `${window.location.origin}/secure/${result.qr_id}`;
+        return `${window.location.origin}/secure/${data.qrId}`;
       } catch (error) {
         console.error('Error creating protected QR:', error);
         toast({
@@ -595,16 +591,12 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
       let dataUrl: string;
       
       if (format === 'png') {
-        // Dynamic import for html-to-image to reduce initial bundle size
-        const { toPng } = await import('html-to-image');
         dataUrl = await toPng(qrRef.current, {
           quality: 1,
           pixelRatio: 3,
           backgroundColor: qrStyle.bgColor,
         });
       } else {
-        // Dynamic import for SVG format
-        const { toSvg } = await import('html-to-image');
         dataUrl = await toSvg(qrRef.current, {
           backgroundColor: qrStyle.bgColor,
         });
@@ -2220,22 +2212,19 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
 
                 {/* QR Code Size Slider */}
                 <div className="space-y-4">
-                  <Label className="text-sm font-medium">QR Code Size: {Math.min(qrStyle.size, 360)}px</Label>
+                  <Label className="text-sm font-medium">QR Code Size: {qrStyle.size}px</Label>
                   <Slider
                     value={[qrStyle.size]}
-                    onValueChange={(value) => setQrStyle({ ...qrStyle, size: Math.min(value[0], 360) })}
-                    max={360} // Enforce max size limit of 360px
-                    min={100}
+                    onValueChange={(value) => setQrStyle({ ...qrStyle, size: value[0] })}
+    max={400}
+    min={100}
                     step={10}
                     className="w-full"
                   />
                   <div className="flex justify-between text-xs text-muted-foreground">
                     <span>Small (100px)</span>
-                    <span>Large (360px)</span>
+                    <span>Large (400px)</span>
                   </div>
-                  <p className="text-xs text-muted-foreground">
-                    Maximum size: 360px for optimal mobile performance
-                  </p>
                 </div>
 
                 <div>
@@ -2292,12 +2281,11 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
                     {qrValue ? (
                       <QRCodeSVG
                         value={getProtectedQRValueSync()}
-                        size={Math.min(qrStyle.size, 360)} // Enforce max size of 360px
+                        size={qrStyle.size}
                         fgColor={qrStyle.fgColor}
                         bgColor={qrStyle.bgColor}
                         level={qrStyle.level}
                         includeMargin
-                        className="max-w-[360px] max-h-[360px]" // CSS max constraints
                       />
                     ) : (
                       <div 
