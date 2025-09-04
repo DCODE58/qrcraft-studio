@@ -1,6 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import * as bcrypt from "https://deno.land/x/bcrypt@v0.4.1/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -27,27 +26,26 @@ serve(async (req) => {
 
     console.log('Verifying password for QR ID:', id);
 
-    const { data, error } = await supabase
-      .from('qr_codes')
-      .select('password_hash, content_url, expires_at')
-      .eq('id', id)
-      .single();
+    // Use the database RPC function to verify password
+    const { data, error } = await supabase.rpc('verify_qr_password', {
+      qr_id_param: id,
+      password_text: password
+    });
 
-    if (error || !data) {
-      console.error('QR code not found:', error);
-      throw new Error("QR code not found");
+    if (error) {
+      console.error('Error verifying password:', error);
+      throw new Error("Verification failed");
     }
 
-    // Check if QR code has expired
-    if (data.expires_at && new Date(data.expires_at) < new Date()) {
-      throw new Error("QR code has expired");
+    if (!data || data.length === 0) {
+      throw new Error("No verification result");
     }
 
-    const isValid = await bcrypt.compare(password, data.password_hash);
-    
-    if (!isValid) {
-      console.log('Invalid password provided');
-      throw new Error("Invalid password");
+    const result = data[0];
+
+    if (!result.success) {
+      console.log('Password verification failed:', result.error_message);
+      throw new Error(result.error_message || "Invalid password");
     }
 
     console.log('Password verified successfully');
@@ -55,7 +53,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         success: true, 
-        url: data.content_url 
+        url: result.content_url 
       }), 
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -66,13 +64,16 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error in verifyPassword function:', error);
     
+    const status = error.message === "Invalid password" || 
+                  error.message === "QR code has expired" ? 401 : 400;
+    
     return new Response(
       JSON.stringify({ 
         success: false, 
         error: error.message 
       }), 
       {
-        status: error.message === "Invalid password" ? 401 : 400,
+        status,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       }
     );

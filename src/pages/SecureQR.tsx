@@ -42,19 +42,28 @@ export default function SecureQR() {
     setError("");
 
     try {
-      const { data, error: functionError } = await supabase.functions.invoke('verifyPassword', {
-        body: { id, password: password.trim() }
+      // Use the database RPC function to verify password
+      const { data, error } = await supabase.rpc('verify_qr_password', {
+        qr_id_param: id,
+        password_text: password.trim()
       });
 
-      if (functionError) {
-        throw new Error(functionError.message || 'Verification failed');
+      if (error) {
+        console.error('Error verifying password:', error);
+        throw new Error('Verification failed');
       }
 
-      if (!data.success) {
-        throw new Error(data.error || 'Invalid password');
+      if (!data || data.length === 0) {
+        throw new Error('No verification result');
       }
 
-      setContentUrl(data.url);
+      const result = data[0];
+
+      if (!result.success) {
+        throw new Error(result.error_message || 'Invalid password');
+      }
+
+      setContentUrl(result.content_url);
       setIsUnlocked(true);
       
       toast({

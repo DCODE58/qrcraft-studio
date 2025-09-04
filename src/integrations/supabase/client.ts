@@ -8,9 +8,31 @@ const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiO
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
+// Safe storage for Safari Private Mode
+const getStorage = () => {
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      // Test if localStorage is actually working
+      window.localStorage.setItem('test', 'test');
+      window.localStorage.removeItem('test');
+      return window.localStorage;
+    }
+  } catch (e) {
+    console.warn('localStorage not available, using fallback');
+  }
+  
+  // Fallback in-memory storage for Safari Private Mode
+  const memoryStorage = {
+    getItem: (key: string) => memoryStorage[key] || null,
+    setItem: (key: string, value: string) => { memoryStorage[key] = value; },
+    removeItem: (key: string) => { delete memoryStorage[key]; },
+  };
+  return memoryStorage;
+};
+
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   auth: {
-    storage: localStorage,
+    storage: getStorage() as any,
     persistSession: true,
     autoRefreshToken: true,
   }

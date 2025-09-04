@@ -1,6 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import * as bcrypt from "https://deno.land/x/bcrypt@v0.4.1/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -27,40 +26,31 @@ serve(async (req) => {
 
     console.log('Creating password-protected QR for type:', qrType);
 
-    // Hash the password with bcrypt
-    const saltRounds = 12;
-    const passwordHash = await bcrypt.hash(password, saltRounds);
-
-    // Calculate expiry date if provided
-    let expiresAt = null;
-    if (expiresIn) {
-      expiresAt = new Date(Date.now() + expiresIn * 1000).toISOString();
-    }
-
-    // Insert into database
-    const { data, error } = await supabase
-      .from('qr_codes')
-      .insert({
-        password_hash: passwordHash,
-        content_url: contentUrl,
-        qr_type: qrType || 'password-protected',
-        expires_at: expiresAt
-      })
-      .select()
-      .single();
+    // Use the database RPC function to create QR code with hashed password
+    const { data, error } = await supabase.rpc('create_qr_code', {
+      password_text: password,
+      content_url_param: contentUrl,
+      qr_type_param: qrType || 'password-protected',
+      expires_in_seconds: expiresIn || null
+    });
 
     if (error) {
-      console.error('Error saving QR code:', error);
+      console.error('Error creating QR code:', error);
       throw new Error("Failed to create QR code");
     }
 
-    console.log('Password-protected QR created successfully:', data.id);
+    if (!data || data.length === 0) {
+      throw new Error("No data returned from QR creation");
+    }
+
+    const result = data[0];
+    console.log('Password-protected QR created successfully:', result.qr_id);
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        qrId: data.id,
-        expiresAt: data.expires_at
+        qrId: result.qr_id,
+        expiresAt: result.expires_at
       }), 
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
