@@ -22,7 +22,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { toast as sonnerToast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import * as bcrypt from 'bcryptjs';
+
 
 type QRType = 'text' | 'url' | 'email' | 'phone' | 'sms' | 'wifi' | 'vcard' | 'event' | 
              'pdf' | 'links' | 'business' | 'video' | 'images' | 'social' | 'whatsapp' | 
@@ -2216,14 +2216,14 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
                   <Slider
                     value={[qrStyle.size]}
                     onValueChange={(value) => setQrStyle({ ...qrStyle, size: value[0] })}
-    max={400}
-    min={100}
+                    max={360}
+                    min={100}
                     step={10}
                     className="w-full"
                   />
                   <div className="flex justify-between text-xs text-muted-foreground">
                     <span>Small (100px)</span>
-                    <span>Large (400px)</span>
+                    <span>Large (360px)</span>
                   </div>
                 </div>
 

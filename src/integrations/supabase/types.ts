@@ -49,7 +49,26 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      create_qr_code: {
+        Args: {
+          content_url_param: string
+          expires_in_seconds?: number
+          password_text: string
+          qr_type_param?: string
+        }
+        Returns: {
+          expires_at: string
+          qr_id: string
+        }[]
+      }
+      verify_qr_password: {
+        Args: { password_text: string; qr_id_param: string }
+        Returns: {
+          content_url: string
+          error_message: string
+          success: boolean
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
