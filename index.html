@@ -2,10 +2,14 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
     <title>Qr Studio - Professional QR Code Generator</title>
     <meta name="description" content="Generate beautiful, customizable QR codes instantly with professional designs and advanced features." />
     <meta name="author" content="Qr Studio" />
+    
+    <!-- Mobile Optimization -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="format-detection" content="telephone=no" />
     
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#2563EB" />
@@ -14,9 +18,25 @@
     <meta name="apple-mobile-web-app-title" content="Qr Studio" />
     <link rel="manifest" href="/manifest.json" />
     
+    <!-- Font Loading Optimization for Mobile -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Fallback font for better mobile loading -->
+    <style>
+      body { 
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; 
+        margin: 0; 
+        padding: 0;
+        background: hsl(220 18% 99%);
+      }
+      #root {
+        min-height: 100vh;
+        width: 100%;
+      }
+      .font-inter { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; }
+    </style>
 
     <meta property="og:title" content="Qr Studio - Professional QR Code Generator" />
     <meta property="og:description" content="Generate beautiful, customizable QR codes instantly with professional designs and advanced features." />
@@ -29,7 +49,16 @@
   </head>
 
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <noscript>
+        <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; text-align: center;">
+          <div>
+            <h2 style="color: #ef4444; margin-bottom: 16px;">JavaScript Required</h2>
+            <p style="color: #6b7280;">Please enable JavaScript to use QR Studio.</p>
+          </div>
+        </div>
+      </noscript>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
