@@ -3,49 +3,126 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-    <title>Qr Studio - Professional QR Code Generator</title>
-    <meta name="description" content="Generate beautiful, customizable QR codes instantly with professional designs and advanced features." />
-    <meta name="author" content="Qr Studio" />
+    <title>QR Studio - Professional QR Code Generator | Create Custom QR Codes Online</title>
+    <meta name="description" content="Create stunning, professional QR codes with custom frames and designs. Generate QR codes for URLs, WiFi, vCards, events and more. Free online QR code generator with advanced styling options." />
+    <meta name="keywords" content="QR code generator, custom QR codes, professional QR codes, QR code frames, QR code design, free QR generator, WiFi QR code, vCard QR code, event QR code" />
+    <meta name="author" content="QR Studio" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://your-domain.com/" />
     
-    <!-- Mobile Optimization -->
+    <!-- Enhanced SEO Meta Tags -->
+    <meta name="application-name" content="QR Studio" />
+    <meta name="generator" content="QR Studio v1.0" />
+    <meta name="subject" content="QR Code Generation and Design" />
+    <meta name="rating" content="general" />
+    <meta name="referrer" content="origin-when-cross-origin" />
+    <meta name="format-detection" content="telephone=no, address=no, email=no" />
+    
+    <!-- Mobile Optimization & PWA -->
     <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="format-detection" content="telephone=no" />
-    
-    <!-- PWA Meta Tags -->
-    <meta name="theme-color" content="#2563EB" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="apple-mobile-web-app-title" content="Qr Studio" />
-    <link rel="manifest" href="/manifest.json" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="QR Studio" />
+    <meta name="theme-color" content="#2563EB" />
+    <meta name="msapplication-TileColor" content="#2563EB" />
+    <meta name="msapplication-navbutton-color" content="#2563EB" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     
-    <!-- Font Loading Optimization for Mobile -->
+    <!-- PWA Icons and Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/qr-studio-icon-192.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="/qr-studio-icon-512.png" />
+    <link rel="apple-touch-icon" href="/qr-studio-icon-192.png" />
+    <link rel="apple-touch-icon" sizes="192x192" href="/qr-studio-icon-192.png" />
+    <link rel="apple-touch-icon" sizes="512x512" href="/qr-studio-icon-512.png" />
+    
+    <!-- Preload Critical Resources -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="preload" href="/qr-studio-icon-192.png" as="image" type="image/png">
     
-    <!-- Fallback font for better mobile loading -->
+    <!-- Enhanced Open Graph Meta Tags -->
+    <meta property="og:title" content="QR Studio - Professional QR Code Generator | Create Custom QR Codes" />
+    <meta property="og:description" content="Create stunning, professional QR codes with custom frames and designs. Generate QR codes for URLs, WiFi, vCards, events and more with advanced styling options." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://your-domain.com/" />
+    <meta property="og:image" content="/qr-studio-icon-512.png" />
+    <meta property="og:image:width" content="512" />
+    <meta property="og:image:height" content="512" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:site_name" content="QR Studio" />
+    <meta property="og:locale" content="en_US" />
+    
+    <!-- Enhanced Twitter Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@qrstudio" />
+    <meta name="twitter:creator" content="@qrstudio" />
+    <meta name="twitter:title" content="QR Studio - Professional QR Code Generator" />
+    <meta name="twitter:description" content="Create stunning, professional QR codes with custom frames and designs. Free online QR generator with advanced styling options." />
+    <meta name="twitter:image" content="/qr-studio-icon-512.png" />
+    <meta name="twitter:image:alt" content="QR Studio - Professional QR Code Generator" />
+    
+    <!-- Schema.org Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "QR Studio",
+      "description": "Professional QR code generator with custom frames and designs. Create QR codes for URLs, WiFi, vCards, events and more.",
+      "url": "https://your-domain.com",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Web Browser",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "creator": {
+        "@type": "Organization",
+        "name": "QR Studio"
+      },
+      "featureList": [
+        "Custom QR Code Frames",
+        "Professional QR Code Designs", 
+        "WiFi QR Codes",
+        "vCard QR Codes",
+        "Event QR Codes",
+        "High Resolution Export",
+        "Real-time Preview"
+      ]
+    }
+    </script>
+    
+    <!-- Performance & Loading Optimization -->
     <style>
       body { 
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; 
         margin: 0; 
         padding: 0;
         background: hsl(220 18% 99%);
+        line-height: 1.6;
       }
       #root {
         min-height: 100vh;
         width: 100%;
       }
       .font-inter { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; }
+      
+      /* Loading spinner for better UX */
+      .loading-spinner {
+        display: inline-block;
+        width: 40px;
+        height: 40px;
+        border: 3px solid rgba(37, 99, 235, 0.3);
+        border-radius: 50%;
+        border-top-color: #2563EB;
+        animation: spin 1s ease-in-out infinite;
+      }
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
     </style>
-
-    <meta property="og:title" content="Qr Studio - Professional QR Code Generator" />
-    <meta property="og:description" content="Generate beautiful, customizable QR codes instantly with professional designs and advanced features." />
-    <meta property="og:type" content="website" />
-    <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
-
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@lovable_dev" />
-    <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
   </head>
 
   <body>

@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { QrCode, Sparkles, Download, Palette, Smartphone, Zap, Star, Globe, Shield, Users } from "lucide-react";
-import QrGenerator from "@/components/QrGenerator";
+import EnhancedQRGenerator from "@/components/EnhancedQRGenerator";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CookieConsent from "@/components/CookieConsent";
@@ -13,7 +13,7 @@ const Index = () => {
   const [showGenerator, setShowGenerator] = useState(false);
 
   if (showGenerator) {
-    return <QrGenerator onBack={() => setShowGenerator(false)} />;
+    return <EnhancedQRGenerator onBack={() => setShowGenerator(false)} />;
   }
 
   return (
