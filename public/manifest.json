@@ -1,16 +1,19 @@
 {
-  "name": "QR Studio - Professional QR Code Generator",
-  "short_name": "QR Studio",
-  "description": "Create stunning, customizable QR codes with professional frames and designs. Generate QR codes for URLs, WiFi, vCards, events and more with advanced styling options.",
+  "name": "Qr Studio - Professional QR Generator",
+  "short_name": "Qr Studio",
+  "description": "Generate beautiful, customizable QR codes instantly with professional designs and advanced features.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#2563EB",
   "orientation": "portrait-primary",
-  "scope": "/",
-  "id": "qr-studio-pwa",
   "icons": [
     {
+      "src": "/favicon.ico",
+      "sizes": "16x16",
+      "type": "image/x-icon"
+    },
+    {
       "src": "/qr-studio-icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
@@ -20,45 +23,10 @@
       "src": "/qr-studio-icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/qr-studio-icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
-    },
-    {
-      "src": "/qr-studio-icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable"
+      "purpose": "any maskable"
     }
   ],
-  "categories": ["productivity", "utilities", "business", "tools"],
-  "shortcuts": [
-    {
-      "name": "Generate QR Code",
-      "short_name": "Generate",
-      "url": "/#generate",
-      "icons": [
-        {
-          "src": "/qr-studio-icon-192.png",
-          "sizes": "192x192",
-          "type": "image/png"
-        }
-      ]
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "/qr-studio-icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "form_factor": "narrow"
-    }
-  ],
+  "categories": ["productivity", "utilities", "business"],
   "lang": "en",
-  "dir": "ltr",
-  "prefer_related_applications": false
+  "dir": "ltr"
 }
