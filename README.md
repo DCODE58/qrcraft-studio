@@ -1,73 +1,229 @@
-# Welcome to your Lovable project
+# 🎨 QR Studio – Next-Gen QR Code Generator
 
-## Project info
+[![Vite](https://img.shields.io/badge/Vite-5.0-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
+[![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Supabase](https://img.shields.io/badge/Supabase-Edge%20Functions-3ECF8E?logo=supabase&logoColor=white)](https://supabase.com/)
+[![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3-38B2AC?logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
 
-**URL**: https://lovable.dev/projects/39d51157-56f1-44cc-ae04-29f76a5a8803
+🚀 **QR Studio** is a modern **QR code generator** with:
+- 🎨 Custom colors, gradients, and logos
+- 🔒 Password-protected QR codes
+- 📂 Private media handling via signed URLs
+- 📱 Installable **PWA** (works offline)
+- 📤 Export to PNG / SVG
+- ⚡ Built with **React + Vite + Supabase Edge Functions**
 
-## How can I edit this code?
+---
 
-There are several ways of editing your application.
+## ✨ Features
 
-**Use Lovable**
+✅ Generate multiple QR types: **Text, Links, WiFi, Email, Media, Password-Protected**  
+✅ Customize QR: **colors, background, rounded corners, logos**  
+✅ 🔒 Secure QRs:
+- Password protection
+- Server-side hashing (`pgcrypto`)
+- Expiry dates  
+✅ 📂 Media viewer: Signed Supabase URLs  
+✅ 📤 Export options: PNG / SVG download  
+✅ 📱 PWA Ready (add to home screen, works offline)  
+✅ 🎭 Smooth UI animations with Framer Motion  
+✅ 🧩 UI built on [shadcn/ui](https://ui.shadcn.com) + TailwindCSS  
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/39d51157-56f1-44cc-ae04-29f76a5a8803) and start prompting.
+---
 
-Changes made via Lovable will be committed automatically to this repo.
+## 📸 Screenshots
 
-**Use your preferred IDE**
+### Landing Page
+![Landing](./docs/screenshots/landing.png)
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### QR Generator UI
+![Generator](./docs/screenshots/generator.png)
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### Password-Protected QR
+![Password QR](./docs/screenshots/password-protected.png)
 
-Follow these steps:
+*(Replace with real screenshots from your `src/assets` or take live app screenshots)*
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+---
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+## 🛠️ Tech Stack
 
-# Step 3: Install the necessary dependencies.
-npm i
+| Layer           | Tools / Libraries |
+|-----------------|------------------|
+| **Frontend**    | React 18, TypeScript, Vite, TailwindCSS, shadcn/ui, Framer Motion |
+| **Backend**     | Supabase Edge Functions (Deno) |
+| **Database**    | Supabase Postgres + pgcrypto |
+| **Exports**     | qrcode.react, html-to-image |
+| **PWA**         | manifest.json + custom service worker |
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+---
+
+## 🚀 Getting Started
+
+### 1️⃣ Clone repo
+```bash
+git clone https://github.com/yourusername/qrcraft-studio.git
+cd qrcraft-studio
+
+2️⃣ Install dependencies
+
+npm install
+
+3️⃣ Set up environment variables
+
+Create .env file:
+
+# Client-safe vars (commit .env.example only!)
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=your-anon-key
+
+# Server-side secrets (set in Supabase/hosting platform, never commit)
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+APP_ALLOWED_ORIGINS=https://yourdomain.com
+
+⚠️ Never commit SUPABASE_SERVICE_ROLE_KEY.
+
+4️⃣ Run development server
+
 npm run dev
-```
 
-**Edit a file directly in GitHub**
+App runs at: http://localhost:5173
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+5️⃣ Build for production
 
-**Use GitHub Codespaces**
+npm run build
+npm run preview
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
 
-## What technologies are used for this project?
+---
 
-This project is built with:
+🗄️ Supabase Setup
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+Database migrations
 
-## How can I deploy this project?
+Run migrations via CLI:
 
-Simply open [Lovable](https://lovable.dev/projects/39d51157-56f1-44cc-ae04-29f76a5a8803) and click on Share -> Publish.
+supabase db push
 
-## Can I connect a custom domain to my Lovable project?
+This sets up:
 
-Yes, you can!
+qr_codes table
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+pgcrypto extension
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+Password hash + verification functions
+
+RLS policies
+
+
+Deploy Edge Functions
+
+supabase functions deploy createPasswordQR
+supabase functions deploy verifyPassword
+supabase functions deploy getSignedUrl
+
+
+---
+
+🔐 Security Notes
+
+Passwords are hashed with pgcrypto in Postgres (never stored in plain text).
+
+Service Role Key is used only in Edge Functions (server-side).
+
+CORS restricted to APP_ALLOWED_ORIGINS.
+
+Recommended: add rate limiting / captcha for password verification.
+
+
+
+---
+
+📂 Project Structure
+
+qrcraft-studio/
+│── src/
+│   ├── App.tsx           # App entry + routes
+│   ├── main.tsx          # Bootstrap
+│   ├── components/       # UI + Generator
+│   │   ├── QrGenerator.tsx
+│   │   ├── ui/           # shadcn components
+│   │   └── ...
+│   ├── pages/            # Routes: Index, SecureQR, MediaViewer
+│   └── integrations/     # Supabase client + types
+│
+│── supabase/
+│   ├── migrations/       # SQL migrations
+│   └── functions/        # Edge Functions (Deno)
+│
+│── public/
+│   ├── manifest.json     # PWA manifest
+│   ├── sw.js             # Service worker
+│   └── icons/
+│
+│── package.json
+│── tailwind.config.ts
+│── vite.config.ts
+│── .env.example
+
+
+---
+
+📦 Available Scripts
+
+npm run dev        # Start dev server
+npm run build      # Build production bundle
+npm run preview    # Preview built app
+npm run lint       # Lint code
+
+
+---
+
+🛡️ Roadmap
+
+[ ] QR analytics (track scans, clicks)
+
+[ ] User accounts (save QR templates)
+
+[ ] Team / collaboration features
+
+[ ] Short URLs + campaign tracking
+
+[ ] More export formats (PDF, EPS)
+
+
+
+---
+
+🤝 Contributing
+
+1. Fork repo
+
+
+2. Create feature branch (git checkout -b feature/my-feature)
+
+
+3. Commit changes (git commit -m "Add feature")
+
+
+4. Push to branch (git push origin feature/my-feature)
+
+
+5. Open Pull Request
+
+
+
+
+---
+
+📜 License
+
+MIT License © 2025 Dave(DCODE)
+
+
+---
+
+🌐 Live Demo
+
+👉 https://qrcraftstudio.vercel.app
