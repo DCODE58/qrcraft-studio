@@ -11,7 +11,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   ArrowLeft, Download, Palette, Settings, Wifi, Phone, Mail, User, Calendar, 
   MessageSquare, Copy, Share2, Sparkles, Zap, Globe, FileText, Link, Users, 
@@ -23,9 +22,6 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { toast as sonnerToast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import { QRTemplates, QRTemplate } from '@/components/qr/QRTemplates';
-import { AdvancedCustomization, AdvancedQRStyle } from '@/components/qr/AdvancedCustomization';
-import { BrandKitManager, BrandKit } from '@/components/qr/BrandKitManager';
 
 
 type QRType = 'text' | 'url' | 'email' | 'phone' | 'sms' | 'wifi' | 'vcard' | 'event' | 
@@ -131,7 +127,6 @@ interface QRStyle {
   bgColor: string;
   size: number;
   level: 'L' | 'M' | 'Q' | 'H';
-  advanced?: AdvancedQRStyle;
 }
 
 interface QrGeneratorProps {
@@ -226,27 +221,8 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
   const [qrStyle, setQrStyle] = useState<QRStyle>({
     fgColor: '#2563EB',
     bgColor: '#FFFFFF',
-    size: 512,
-    level: 'H',
-    advanced: {
-      dotStyle: 'square',
-      cornerSquareStyle: 'square',
-      cornerDotStyle: 'square',
-      border: {
-        enabled: false,
-        width: 8,
-        color: '#F0F9FF',
-        style: 'solid',
-        radius: 12
-      },
-      shadow: {
-        enabled: false,
-        blur: 20,
-        color: 'rgba(37, 99, 235, 0.15)',
-        offsetX: 0,
-        offsetY: 4
-      }
-    }
+    size: 280,
+    level: 'M'
   });
 
   const [hasPassword, setHasPassword] = useState(false);
@@ -262,75 +238,11 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
   const [showColorPalette, setShowColorPalette] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [selectedTemplateId, setSelectedTemplateId] = useState<string>();
   const qrCodeRef = useRef<HTMLDivElement>(null);
   const contentFormRef = useRef<HTMLDivElement>(null);
 
   const qrRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
-
-  const handleTemplateSelect = (template: QRTemplate) => {
-    setSelectedTemplateId(template.id);
-    setQrStyle({
-      ...qrStyle,
-      fgColor: template.style.fgColor,
-      bgColor: template.style.bgColor,
-      advanced: {
-        dotStyle: template.style.dotStyle,
-        cornerSquareStyle: template.style.cornerSquareStyle,
-        cornerDotStyle: template.style.cornerDotStyle,
-        gradient: template.style.gradient ? {
-          enabled: true,
-          type: template.style.gradient.type,
-          colorStops: template.style.gradient.colorStops,
-          angle: 135
-        } : undefined,
-        border: {
-          ...qrStyle.advanced!.border,
-          ...(template.style.border || {}),
-          radius: template.style.border?.width ? 12 : qrStyle.advanced!.border.radius
-        },
-        shadow: {
-          ...qrStyle.advanced!.shadow,
-          ...(template.style.shadow || {})
-        }
-      }
-    });
-    setCurrentStep(3);
-  };
-
-  const handleLogoUpload = (file: File) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const url = e.target?.result as string;
-      setQrStyle({
-        ...qrStyle,
-        advanced: {
-          ...qrStyle.advanced!,
-          logo: {
-            url,
-            size: 20,
-            margin: 10
-          }
-        }
-      });
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const handleBrandKitApply = (kit: BrandKit) => {
-    setQrStyle({
-      ...qrStyle,
-      fgColor: kit.primaryColor,
-      bgColor: kit.secondaryColor,
-      advanced: kit.style
-    });
-    toast({
-      title: "Brand Kit Applied!",
-      description: `"${kit.name}" style has been applied to your QR code`,
-      className: "bg-gradient-to-r from-emerald-50 to-green-50 border-emerald-200"
-    });
-  };
 
   const colorPalettes = {
     'blue-green': { primary: '#527AC9', secondary: '#7EC09F' },
@@ -2158,163 +2070,180 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold">Customize Style</h3>
-                    <p className="text-sm text-muted-foreground">Professional QR code design system</p>
+                    <p className="text-sm text-muted-foreground">Personalize your QR code appearance</p>
                   </div>
                 </div>
 
-                <Tabs defaultValue="templates" className="w-full">
-                  <TabsList className="grid w-full grid-cols-4">
-                    <TabsTrigger value="templates">
-                      <Sparkles className="w-4 h-4 mr-1" />
-                      Templates
-                    </TabsTrigger>
-                    <TabsTrigger value="basic">
-                      <Palette className="w-4 h-4 mr-1" />
-                      Colors
-                    </TabsTrigger>
-                    <TabsTrigger value="advanced">
-                      <Settings className="w-4 h-4 mr-1" />
-                      Advanced
-                    </TabsTrigger>
-                    <TabsTrigger value="brand">
-                      <Briefcase className="w-4 h-4 mr-1" />
-                      Brand Kits
-                    </TabsTrigger>
-                  </TabsList>
+                {/* Color Palette Selection */}
+                <div className="space-y-4">
+                  <Label className="text-sm font-medium">Color palette</Label>
+                  <div className="grid grid-cols-3 gap-3">
+                    {Object.entries(colorPalettes).map(([key, palette]) => (
+                      <button
+                        key={key}
+                        onClick={() => {
+                          setSelectedColorPalette(key);
+                          setQrStyle({
+                            ...qrStyle,
+                            fgColor: palette.primary,
+                            bgColor: '#FFFFFF'
+                          });
+                          setCurrentStep(3);
+                        }}
+                        className={`h-20 rounded-lg border-2 transition-all ${
+                          selectedColorPalette === key 
+                            ? 'border-primary ring-2 ring-primary/20' 
+                            : 'border-border hover:border-primary/50'
+                        }`}
+                        style={{
+                          background: key === 'blue-green' 
+                            ? `linear-gradient(135deg, ${palette.primary}, ${palette.secondary})`
+                            : key.includes('black')
+                            ? `linear-gradient(135deg, ${palette.primary}, ${palette.secondary})`
+                            : palette.primary
+                        }}
+                      />
+                    ))}
+                  </div>
+                </div>
 
-                  <TabsContent value="templates" className="space-y-4 mt-6">
-                    <QRTemplates 
-                      onSelectTemplate={handleTemplateSelect}
-                      selectedTemplateId={selectedTemplateId}
-                    />
-                  </TabsContent>
-
-                  <TabsContent value="basic" className="space-y-6 mt-6">
-                    {/* Color Palette Selection */}
-                    <div className="space-y-4">
-                      <Label className="text-sm font-medium">Quick Color Palettes</Label>
-                      <div className="grid grid-cols-3 gap-3">
-                        {Object.entries(colorPalettes).map(([key, palette]) => (
-                          <button
-                            key={key}
-                            onClick={() => {
-                              setSelectedColorPalette(key);
-                              setQrStyle({
-                                ...qrStyle,
-                                fgColor: palette.primary,
-                                bgColor: '#FFFFFF'
-                              });
-                              setCurrentStep(3);
-                            }}
-                            className={`h-20 rounded-lg border-2 transition-all ${
-                              selectedColorPalette === key 
-                                ? 'border-primary ring-2 ring-primary/20' 
-                                : 'border-border hover:border-primary/50'
-                            }`}
-                            style={{
-                              background: key === 'blue-green' 
-                                ? `linear-gradient(135deg, ${palette.primary}, ${palette.secondary})`
-                                : key.includes('black')
-                                ? `linear-gradient(135deg, ${palette.primary}, ${palette.secondary})`
-                                : palette.primary
-                            }}
-                          />
-                        ))}
+                {/* Interactive Color Picker */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-sm font-medium">Color Customization</Label>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowColorPalette(!showColorPalette)}
+                      className="gap-2"
+                    >
+                      <Palette className="w-4 h-4" />
+                      {showColorPalette ? 'Hide Palette' : 'Show Palette'}
+                    </Button>
+                  </div>
+                  
+                  {showColorPalette && (
+                    <div className="flex flex-col gap-4 p-4 bg-gradient-to-br from-muted/30 to-muted/50 rounded-lg border border-border/50 backdrop-blur-sm animate-fade-in">
+                      <div className="w-full max-w-xs mx-auto">
+                        <HexColorPicker 
+                          color={qrStyle.fgColor} 
+                          onChange={(color) => {
+                            setQrStyle({ ...qrStyle, fgColor: color });
+                            setCurrentStep(3);
+                          }}
+                          style={{ width: '100%', height: '200px' }}
+                        />
                       </div>
-                    </div>
+                      <div className="flex gap-2 items-center">
+                      <div 
+                        className="w-12 h-10 rounded border border-border"
+                        style={{ backgroundColor: qrStyle.fgColor }}
+                      />
+                      <Input
+                        type="text"
+                        value={qrStyle.fgColor}
+                        onChange={(e) => setQrStyle({ ...qrStyle, fgColor: e.target.value })}
+                        className="input-elevated flex-1 bg-background text-foreground"
+                        placeholder="#527AC9"
+                      />
+                        </div>
+                      </div>
+                    )}
+                  </div>
 
-                    {/* Interactive Color Picker */}
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <Label className="text-sm font-medium">Custom Color</Label>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setShowColorPalette(!showColorPalette)}
-                          className="gap-2"
-                        >
-                          <Palette className="w-4 h-4" />
-                          {showColorPalette ? 'Hide' : 'Show'} Picker
+                {/* QR Frame Selection */}
+                <div className="space-y-4">
+                  <Label className="text-sm font-medium">QR Frame Style</Label>
+                  <div className="grid grid-cols-3 gap-3">
+                    <button
+                      onClick={() => setQrFrame('scan-me')}
+                      className={`p-4 border-2 rounded-lg text-center transition-all ${
+                        qrFrame === 'scan-me' 
+                          ? 'border-primary bg-primary/5' 
+                          : 'border-border hover:border-primary/50'
+                      }`}
+                    >
+                      <div className="text-sm font-medium">Scan Me</div>
+                      <div className="text-xs text-muted-foreground mt-1">Classic frame</div>
+                    </button>
+                    <button
+                      onClick={() => setQrFrame('rounded')}
+                      className={`p-4 border-2 rounded-lg text-center transition-all ${
+                        qrFrame === 'rounded' 
+                          ? 'border-primary bg-primary/5' 
+                          : 'border-border hover:border-primary/50'
+                      }`}
+                    >
+                      <div className="text-sm font-medium">Rounded</div>
+                      <div className="text-xs text-muted-foreground mt-1">Modern frame</div>
+                    </button>
+                    <button
+                      onClick={() => setQrFrame('custom')}
+                      className={`p-4 border-2 rounded-lg text-center transition-all ${
+                        qrFrame === 'custom' 
+                          ? 'border-primary bg-primary/5' 
+                          : 'border-border hover:border-primary/50'
+                      }`}
+                    >
+                      <div className="text-sm font-medium">Custom</div>
+                      <div className="text-xs text-muted-foreground mt-1">Your own text</div>
+                    </button>
+                  </div>
+                  
+                  {/* Custom Frame Name Input */}
+                  {qrFrame === 'custom' && (
+                    <div className="mt-3">
+                      <Label htmlFor="custom-frame-name" className="text-sm font-medium">Custom Frame Text</Label>
+                      <div className="flex gap-2 mt-2">
+                        <Input
+                          id="custom-frame-name"
+                          placeholder="Enter custom text..."
+                          value={customFrameName}
+                          onChange={(e) => setCustomFrameName(e.target.value)}
+                          className="input-elevated flex-1"
+                        />
+                        <Button variant="outline" size="sm">
+                          <Edit3 className="w-4 h-4" />
                         </Button>
                       </div>
-                      
-                      {showColorPalette && (
-                        <div className="flex flex-col gap-4 p-4 bg-muted/30 rounded-lg border border-border/50 animate-fade-in">
-                          <div className="w-full max-w-xs mx-auto">
-                            <HexColorPicker 
-                              color={qrStyle.fgColor} 
-                              onChange={(color) => {
-                                setQrStyle({ ...qrStyle, fgColor: color });
-                                setCurrentStep(3);
-                              }}
-                              style={{ width: '100%', height: '200px' }}
-                            />
-                          </div>
-                          <div className="flex gap-2 items-center">
-                            <div 
-                              className="w-12 h-10 rounded border border-border"
-                              style={{ backgroundColor: qrStyle.fgColor }}
-                            />
-                            <Input
-                              type="text"
-                              value={qrStyle.fgColor}
-                              onChange={(e) => setQrStyle({ ...qrStyle, fgColor: e.target.value })}
-                              className="input-elevated flex-1"
-                              placeholder="#2563EB"
-                            />
-                          </div>
-                        </div>
-                      )}
                     </div>
+                  )}
+                </div>
 
-                    {/* QR Code Size Slider */}
-                    <div className="space-y-4">
-                      <Label className="text-sm font-medium">QR Code Size: {qrStyle.size}px</Label>
-                      <Slider
-                        value={[qrStyle.size]}
-                        onValueChange={(value) => setQrStyle({ ...qrStyle, size: value[0] })}
-                        max={1024}
-                        min={256}
-                        step={32}
-                        className="w-full"
-                      />
-                      <div className="flex justify-between text-xs text-muted-foreground">
-                        <span>Small (256px)</span>
-                        <span>Extra Large (1024px)</span>
-                      </div>
-                    </div>
+                {/* QR Code Size Slider */}
+                <div className="space-y-4">
+                  <Label className="text-sm font-medium">QR Code Size: {qrStyle.size}px</Label>
+                  <Slider
+                    value={[qrStyle.size]}
+                    onValueChange={(value) => setQrStyle({ ...qrStyle, size: value[0] })}
+                    max={360}
+                    min={100}
+                    step={10}
+                    className="w-full"
+                  />
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>Small (100px)</span>
+                    <span>Large (360px)</span>
+                  </div>
+                </div>
 
-                    <div>
-                      <Label htmlFor="level" className="text-sm font-medium">Error Correction Level</Label>
-                      <Select 
-                        value={qrStyle.level} 
-                        onValueChange={(value: 'L' | 'M' | 'Q' | 'H') => setQrStyle({ ...qrStyle, level: value })}
-                      >
-                        <SelectTrigger className="input-elevated mt-2">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="L">Low - 7% recovery (faster scan)</SelectItem>
-                          <SelectItem value="M">Medium - 15% recovery (balanced)</SelectItem>
-                          <SelectItem value="Q">Quartile - 25% recovery (recommended)</SelectItem>
-                          <SelectItem value="H">High - 30% recovery (best for logos)</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </TabsContent>
-
-                  <TabsContent value="advanced" className="mt-6">
-                    <AdvancedCustomization
-                      style={qrStyle.advanced!}
-                      onChange={(advanced) => setQrStyle({ ...qrStyle, advanced })}
-                      onLogoUpload={handleLogoUpload}
-                    />
-                  </TabsContent>
-
-                  <TabsContent value="brand" className="mt-6">
-                    <BrandKitManager onApplyKit={handleBrandKitApply} />
-                  </TabsContent>
-                </Tabs>
+                <div>
+                  <Label htmlFor="level" className="text-sm font-medium">Error Correction</Label>
+                  <Select 
+                    value={qrStyle.level} 
+                    onValueChange={(value: 'L' | 'M' | 'Q' | 'H') => setQrStyle({ ...qrStyle, level: value })}
+                  >
+                    <SelectTrigger className="input-elevated mt-2">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="L">Low (~7%)</SelectItem>
+                      <SelectItem value="M">Medium (~15%)</SelectItem>
+                      <SelectItem value="Q">Quartile (~25%)</SelectItem>
+                      <SelectItem value="H">High (~30%)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </Card>
           </div>
