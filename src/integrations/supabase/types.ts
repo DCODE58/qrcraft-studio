@@ -14,6 +14,72 @@ export type Database = {
   }
   public: {
     Tables: {
+      brand_kits: {
+        Row: {
+          colors: Json
+          created_at: string
+          fonts: Json | null
+          id: string
+          logo_url: string | null
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          colors: Json
+          created_at?: string
+          fonts?: Json | null
+          id?: string
+          logo_url?: string | null
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          colors?: Json
+          created_at?: string
+          fonts?: Json | null
+          id?: string
+          logo_url?: string | null
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      bulk_generation_jobs: {
+        Row: {
+          completed_codes: number
+          created_at: string
+          download_url: string | null
+          error_log: Json | null
+          failed_codes: number
+          id: string
+          settings: Json
+          status: string
+          total_codes: number
+        }
+        Insert: {
+          completed_codes?: number
+          created_at?: string
+          download_url?: string | null
+          error_log?: Json | null
+          failed_codes?: number
+          id?: string
+          settings: Json
+          status?: string
+          total_codes: number
+        }
+        Update: {
+          completed_codes?: number
+          created_at?: string
+          download_url?: string | null
+          error_log?: Json | null
+          failed_codes?: number
+          id?: string
+          settings?: Json
+          status?: string
+          total_codes?: number
+        }
+        Relationships: []
+      }
       qr_analytics: {
         Row: {
           browser: string | null
@@ -87,20 +153,31 @@ export type Database = {
       }
       qr_codes: {
         Row: {
+          activation_date: string | null
+          allowed_countries: string[] | null
           color_scheme: Json | null
           content_url: string
           created_at: string | null
           creator_ip: unknown
           creator_user_agent: string | null
           description: string | null
+          device_restrictions: Json | null
           expires_at: string | null
           id: string
+          ip_blacklist: string[] | null
+          ip_whitelist: string[] | null
           is_dynamic: boolean | null
+          is_recurring: boolean | null
           logo_url: string | null
+          max_scans_per_ip: number | null
           password_hash: string
           qr_type: Database["public"]["Enums"]["qr_type_enum"] | null
+          recurrence_pattern: string | null
+          require_2fa: boolean | null
+          restricted_countries: string[] | null
           scan_count: number | null
           scan_limit: number | null
+          short_url_id: string | null
           status: Database["public"]["Enums"]["qr_status_enum"] | null
           style_options: Json | null
           title: string | null
@@ -108,20 +185,31 @@ export type Database = {
           utm_parameters: Json | null
         }
         Insert: {
+          activation_date?: string | null
+          allowed_countries?: string[] | null
           color_scheme?: Json | null
           content_url: string
           created_at?: string | null
           creator_ip?: unknown
           creator_user_agent?: string | null
           description?: string | null
+          device_restrictions?: Json | null
           expires_at?: string | null
           id?: string
+          ip_blacklist?: string[] | null
+          ip_whitelist?: string[] | null
           is_dynamic?: boolean | null
+          is_recurring?: boolean | null
           logo_url?: string | null
+          max_scans_per_ip?: number | null
           password_hash: string
           qr_type?: Database["public"]["Enums"]["qr_type_enum"] | null
+          recurrence_pattern?: string | null
+          require_2fa?: boolean | null
+          restricted_countries?: string[] | null
           scan_count?: number | null
           scan_limit?: number | null
+          short_url_id?: string | null
           status?: Database["public"]["Enums"]["qr_status_enum"] | null
           style_options?: Json | null
           title?: string | null
@@ -129,27 +217,46 @@ export type Database = {
           utm_parameters?: Json | null
         }
         Update: {
+          activation_date?: string | null
+          allowed_countries?: string[] | null
           color_scheme?: Json | null
           content_url?: string
           created_at?: string | null
           creator_ip?: unknown
           creator_user_agent?: string | null
           description?: string | null
+          device_restrictions?: Json | null
           expires_at?: string | null
           id?: string
+          ip_blacklist?: string[] | null
+          ip_whitelist?: string[] | null
           is_dynamic?: boolean | null
+          is_recurring?: boolean | null
           logo_url?: string | null
+          max_scans_per_ip?: number | null
           password_hash?: string
           qr_type?: Database["public"]["Enums"]["qr_type_enum"] | null
+          recurrence_pattern?: string | null
+          require_2fa?: boolean | null
+          restricted_countries?: string[] | null
           scan_count?: number | null
           scan_limit?: number | null
+          short_url_id?: string | null
           status?: Database["public"]["Enums"]["qr_status_enum"] | null
           style_options?: Json | null
           title?: string | null
           updated_at?: string | null
           utm_parameters?: Json | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "qr_codes_short_url_id_fkey"
+            columns: ["short_url_id"]
+            isOneToOne: false
+            referencedRelation: "short_urls"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       qr_event_data: {
         Row: {
@@ -286,6 +393,39 @@ export type Database = {
           },
         ]
       }
+      qr_templates: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          id: string
+          is_premium: boolean | null
+          name: string
+          preview_url: string | null
+          style_settings: Json
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_premium?: boolean | null
+          name: string
+          preview_url?: string | null
+          style_settings: Json
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_premium?: boolean | null
+          name?: string
+          preview_url?: string | null
+          style_settings?: Json
+        }
+        Relationships: []
+      }
       qr_vcard_data: {
         Row: {
           address: string | null
@@ -374,6 +514,53 @@ export type Database = {
           },
         ]
       }
+      short_urls: {
+        Row: {
+          clicks: number
+          created_at: string
+          destination_url: string
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          password_hash: string | null
+          qr_code_id: string | null
+          short_code: string
+          updated_at: string
+        }
+        Insert: {
+          clicks?: number
+          created_at?: string
+          destination_url: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          password_hash?: string | null
+          qr_code_id?: string | null
+          short_code: string
+          updated_at?: string
+        }
+        Update: {
+          clicks?: number
+          created_at?: string
+          destination_url?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          password_hash?: string | null
+          qr_code_id?: string | null
+          short_code?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "short_urls_qr_code_id_fkey"
+            columns: ["qr_code_id"]
+            isOneToOne: false
+            referencedRelation: "qr_codes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -391,7 +578,16 @@ export type Database = {
           qr_id: string
         }[]
       }
+      generate_short_code: { Args: never; Returns: string }
       get_qr_analytics_summary: { Args: { qr_id_param: string }; Returns: Json }
+      is_qr_accessible: {
+        Args: {
+          qr_id_param: string
+          scanner_country_param?: string
+          scanner_ip_param?: unknown
+        }
+        Returns: Json
+      }
       record_qr_scan: {
         Args: {
           device_info?: Json
