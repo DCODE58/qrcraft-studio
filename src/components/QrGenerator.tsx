@@ -443,26 +443,26 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
 
   // Step indicator component
   const StepIndicator = () => (
-    <div className="flex items-center justify-center gap-4 mb-8">
-      <div className="flex items-center">
-        <div className={`w-8 h-8 ${currentStep >= 1 ? 'bg-primary text-white' : 'bg-muted text-muted-foreground'} rounded-full flex items-center justify-center text-sm font-semibold`}>
-          {currentStep > 1 ? <CheckCircle className="w-4 h-4" /> : '1'}
+    <div className="flex items-center justify-center gap-3 mb-10">
+      <div className="flex items-center gap-2">
+        <div className={`w-10 h-10 ${currentStep >= 1 ? 'bg-gradient-hero shadow-lg shadow-primary/30' : 'bg-muted'} rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300 ${currentStep >=1 && 'text-white'}`}>
+          {currentStep > 1 ? <CheckCircle className="w-5 h-5" /> : '1'}
         </div>
-        <span className={`ml-2 text-sm font-medium ${currentStep >= 1 ? 'text-primary' : 'text-muted-foreground'}`}>Select QR type</span>
+        <span className={`text-sm font-semibold hidden sm:inline ${currentStep >= 1 ? 'text-primary' : 'text-muted-foreground'}`}>Select Type</span>
       </div>
-      <div className={`w-8 h-0.5 ${currentStep > 1 ? 'bg-primary' : 'bg-border'}`}></div>
-      <div className="flex items-center">
-        <div className={`w-8 h-8 ${currentStep >= 2 ? 'bg-primary text-white' : 'bg-muted text-muted-foreground'} rounded-full flex items-center justify-center text-sm font-semibold`}>
-          {currentStep > 2 ? <CheckCircle className="w-4 h-4" /> : '2'}
+      <div className={`w-12 sm:w-16 h-1 rounded-full transition-all duration-300 ${currentStep > 1 ? 'bg-gradient-hero' : 'bg-border'}`}></div>
+      <div className="flex items-center gap-2">
+        <div className={`w-10 h-10 ${currentStep >= 2 ? 'bg-gradient-hero shadow-lg shadow-primary/30' : 'bg-muted'} rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300 ${currentStep >= 2 && 'text-white'}`}>
+          {currentStep > 2 ? <CheckCircle className="w-5 h-5" /> : '2'}
         </div>
-        <span className={`ml-2 text-sm font-medium ${currentStep >= 2 ? 'text-primary' : 'text-muted-foreground'}`}>Add content</span>
+        <span className={`text-sm font-semibold hidden sm:inline ${currentStep >= 2 ? 'text-primary' : 'text-muted-foreground'}`}>Add Content</span>
       </div>
-      <div className={`w-8 h-0.5 ${currentStep > 2 ? 'bg-primary' : 'bg-border'}`}></div>
-      <div className="flex items-center">
-        <div className={`w-8 h-8 ${currentStep >= 3 ? 'bg-primary text-white' : 'bg-muted text-muted-foreground'} rounded-full flex items-center justify-center text-sm font-semibold`}>
+      <div className={`w-12 sm:w-16 h-1 rounded-full transition-all duration-300 ${currentStep > 2 ? 'bg-gradient-hero' : 'bg-border'}`}></div>
+      <div className="flex items-center gap-2">
+        <div className={`w-10 h-10 ${currentStep >= 3 ? 'bg-gradient-hero shadow-lg shadow-primary/30' : 'bg-muted'} rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300 ${currentStep >= 3 && 'text-white'}`}>
           3
         </div>
-        <span className={`ml-2 text-sm font-medium ${currentStep >= 3 ? 'text-primary' : 'text-muted-foreground'}`}>Design QR code</span>
+        <span className={`text-sm font-semibold hidden sm:inline ${currentStep >= 3 ? 'text-primary' : 'text-muted-foreground'}`}>Design</span>
       </div>
     </div>
   );
@@ -670,14 +670,14 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
 
     return (
       <div ref={contentFormRef}>
-        <Card className="card-elevated animate-slide-in-left">
+        <Card className="card-elevated shadow-xl border-border/50 hover:shadow-2xl transition-shadow duration-300 animate-slide-in-left bg-card/95 backdrop-blur">
           <div className="space-y-6">
-            <div className="flex items-center gap-3">
-              <div className={`w-12 h-12 rounded-xl bg-muted/50 flex items-center justify-center`}>
-                <IconComponent className={`w-6 h-6 ${config?.color || 'text-gray-500'}`} />
+            <div className="flex items-center gap-3 pb-4 border-b border-border/30">
+              <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br from-muted/80 to-muted flex items-center justify-center shadow-md`}>
+                <IconComponent className={`w-7 h-7 ${config?.color || 'text-gray-500'}`} />
               </div>
               <div>
-                <h3 className="text-lg font-semibold">{config?.label || 'Content'}</h3>
+                <h3 className="text-xl font-bold">{config?.label || 'Content'}</h3>
                 <p className="text-sm text-muted-foreground">{config?.description}</p>
               </div>
             </div>
@@ -1937,32 +1937,35 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
             )}
 
             {/* Password Protection Section */}
-            <div className="space-y-4 pt-4 border-t border-border/30">
+            <div className="space-y-4 pt-6 border-t border-border/30 bg-muted/30 -mx-6 px-6 py-6 rounded-b-xl">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <Lock className="w-5 h-5 text-muted-foreground" />
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
+                    <Lock className="w-5 h-5 text-primary" />
+                  </div>
                   <div>
-                    <Label className="text-sm font-medium">Password Protection</Label>
-                    <p className="text-xs text-muted-foreground">Require a password to access this QR code</p>
+                    <Label className="text-sm font-semibold">Password Protection</Label>
+                    <p className="text-xs text-muted-foreground">Secure your QR code with a password</p>
                   </div>
                 </div>
                 <Switch
                   checked={hasPassword}
                   onCheckedChange={setHasPassword}
+                  className="data-[state=checked]:bg-gradient-hero"
                 />
               </div>
               
               {hasPassword && (
-                <div className="space-y-2">
-                  <Label htmlFor="qrPassword" className="text-sm font-medium">Password</Label>
+                <div className="space-y-2 animate-fade-in">
+                  <Label htmlFor="qrPassword" className="text-sm font-medium">Set Password</Label>
                   <div className="relative">
                     <Input
                       id="qrPassword"
                       type={showPassword ? "text" : "password"}
-                      placeholder="Enter password"
+                      placeholder="Enter a secure password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="input-elevated pr-10"
+                      className="input-elevated pr-10 border-primary/30 focus:border-primary"
                     />
                     <Button
                       type="button"
@@ -1972,12 +1975,16 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
                       onClick={() => setShowPassword(!showPassword)}
                     >
                       {showPassword ? (
-                        <EyeOff className="w-4 h-4 text-muted-foreground" />
+                        <EyeOff className="w-4 h-4 text-muted-foreground hover:text-primary transition-colors" />
                       ) : (
-                        <Eye className="w-4 h-4 text-muted-foreground" />
+                        <Eye className="w-4 h-4 text-muted-foreground hover:text-primary transition-colors" />
                       )}
                     </Button>
                   </div>
+                  <p className="text-xs text-muted-foreground flex items-center gap-1">
+                    <Lock className="w-3 h-3" />
+                    Users will need this password to access the QR content
+                  </p>
                 </div>
               )}
             </div>
@@ -1994,22 +2001,22 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
   return (
     <div className="min-h-screen bg-gradient-subtle">
       {/* Header with back button */}
-      <div className="bg-card border-b sticky top-0 z-50">
+      <div className="bg-card/80 backdrop-blur-lg border-b border-border/50 sticky top-0 z-50 shadow-sm">
         <div className="container mx-auto px-4 sm:px-6 py-4">
           <div className="flex items-center gap-4">
             {onBack && (
-              <Button variant="ghost" size="sm" onClick={onBack} className="gap-2">
+              <Button variant="ghost" size="sm" onClick={onBack} className="gap-2 hover:bg-muted/80">
                 <ArrowLeft className="w-4 h-4" />
-                Back
+                <span className="hidden sm:inline">Back</span>
               </Button>
             )}
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-primary to-primary-hover rounded-xl flex items-center justify-center">
-                <QrCode className="w-5 h-5 text-white" />
+              <div className="w-12 h-12 bg-gradient-hero rounded-2xl flex items-center justify-center shadow-lg shadow-primary/20 animate-pulse">
+                <QrCode className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-xl font-bold">Qr Studio</h1>
-                <p className="text-sm text-muted-foreground">Professional QR Generator</p>
+                <h1 className="text-xl font-bold bg-gradient-hero bg-clip-text text-transparent">Qr Studio</h1>
+                <p className="text-xs text-muted-foreground">Professional QR Generator</p>
               </div>
             </div>
           </div>
@@ -2021,35 +2028,39 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
         <StepIndicator />
 
         {/* Main heading */}
-        <div className="text-center space-y-4 mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold">
-            Create a <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">QR code</span> in seconds!
+        <div className="text-center space-y-5 mb-12 animate-fade-in">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">
+            Create a <span className="bg-gradient-hero bg-clip-text text-transparent animate-pulse">QR code</span> in seconds!
           </h2>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Choose from a variety of QR codes to match your needs. Our custom QR codes can link to your business website, provide WiFi access, display restaurant menus, and more.
+          <p className="text-muted-foreground text-base sm:text-lg max-w-3xl mx-auto leading-relaxed px-4">
+            Choose from 25+ QR code types to match your needs. Link to websites, share WiFi, create menus, and much more with professional designs.
           </p>
         </div>
 
         {/* QR Type Selection Grid */}
         <div className="mb-12">
-          <h3 className="text-xl font-semibold mb-6 text-center">Select QR Type</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-8">
+          <div className="flex items-center justify-center gap-2 mb-8">
+            <Sparkles className="w-5 h-5 text-accent" />
+            <h3 className="text-2xl font-bold text-center">Select QR Type</h3>
+            <Sparkles className="w-5 h-5 text-accent" />
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
             {qrTypeConfigs.map((config) => (
               <button
                 key={config.type}
                 onClick={() => handleQRTypeSelect(config.type)}
-                className={`p-4 rounded-xl border-2 transition-all duration-200 hover:scale-105 ${
+                className={`group p-4 sm:p-5 rounded-2xl border-2 transition-all duration-300 hover:scale-105 hover:-translate-y-1 ${
                   qrType === config.type 
-                    ? 'border-primary bg-primary/5 shadow-lg' 
-                    : 'border-border hover:border-primary/50 bg-card'
+                    ? 'border-primary bg-gradient-to-br from-primary/10 to-accent/10 shadow-xl shadow-primary/20' 
+                    : 'border-border/50 hover:border-primary/50 bg-card hover:shadow-lg'
                 }`}
               >
                 <div className="flex flex-col items-center gap-2">
-                  <div className={`w-10 h-10 rounded-lg bg-muted/50 flex items-center justify-center`}>
-                    <config.icon className={`w-5 h-5 ${config.color}`} />
+                  <div className={`w-12 h-12 rounded-xl ${qrType === config.type ? 'bg-gradient-hero shadow-md' : 'bg-muted/50 group-hover:bg-muted'} flex items-center justify-center transition-all duration-300`}>
+                    <config.icon className={`w-6 h-6 ${qrType === config.type ? 'text-white' : config.color}`} />
                   </div>
-                  <span className="text-xs font-medium text-center">{config.label}</span>
-                  <span className="text-xs text-muted-foreground text-center leading-tight">{config.description}</span>
+                  <span className={`text-xs sm:text-sm font-semibold text-center ${qrType === config.type ? 'text-primary' : 'text-foreground'}`}>{config.label}</span>
+                  <span className="text-xs text-muted-foreground text-center leading-tight line-clamp-2">{config.description}</span>
                 </div>
               </button>
             ))}
@@ -2062,21 +2073,24 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
             {renderContentForm()}
             
             {/* Style Settings */}
-            <Card className="card-elevated">
+            <Card className="card-elevated shadow-xl border-border/50 hover:shadow-2xl transition-shadow duration-300 bg-card/95 backdrop-blur">
               <div className="space-y-6">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-xl bg-muted/50 flex items-center justify-center">
-                    <Palette className="w-6 h-6 text-pink-500" />
+                <div className="flex items-center gap-3 pb-4 border-b border-border/30">
+                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-pink-500/20 to-purple-500/20 flex items-center justify-center shadow-md">
+                    <Palette className="w-7 h-7 text-pink-500" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold">Customize Style</h3>
+                    <h3 className="text-xl font-bold">Customize Style</h3>
                     <p className="text-sm text-muted-foreground">Personalize your QR code appearance</p>
                   </div>
                 </div>
 
                 {/* Color Palette Selection */}
                 <div className="space-y-4">
-                  <Label className="text-sm font-medium">Color palette</Label>
+                  <div className="flex items-center gap-2">
+                    <Label className="text-sm font-semibold">Color Palette</Label>
+                    <Sparkles className="w-4 h-4 text-accent" />
+                  </div>
                   <div className="grid grid-cols-3 gap-3">
                     {Object.entries(colorPalettes).map(([key, palette]) => (
                       <button
@@ -2090,10 +2104,10 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
                           });
                           setCurrentStep(3);
                         }}
-                        className={`h-20 rounded-lg border-2 transition-all ${
+                        className={`group h-24 rounded-2xl border-2 transition-all duration-300 hover:scale-105 hover:-translate-y-1 ${
                           selectedColorPalette === key 
-                            ? 'border-primary ring-2 ring-primary/20' 
-                            : 'border-border hover:border-primary/50'
+                            ? 'border-primary ring-4 ring-primary/30 shadow-xl' 
+                            : 'border-border hover:border-primary/50 hover:shadow-lg'
                         }`}
                         style={{
                           background: key === 'blue-green' 
@@ -2102,7 +2116,13 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
                             ? `linear-gradient(135deg, ${palette.primary}, ${palette.secondary})`
                             : palette.primary
                         }}
-                      />
+                      >
+                        {selectedColorPalette === key && (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <CheckCircle className="w-6 h-6 text-white drop-shadow-lg" />
+                          </div>
+                        )}
+                      </button>
                     ))}
                   </div>
                 </div>
@@ -2110,15 +2130,18 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
                 {/* Interactive Color Picker */}
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <Label className="text-sm font-medium">Color Customization</Label>
+                    <Label className="text-sm font-semibold flex items-center gap-2">
+                      <Palette className="w-4 h-4 text-pink-500" />
+                      Advanced Color Picker
+                    </Label>
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => setShowColorPalette(!showColorPalette)}
-                      className="gap-2"
+                      className="gap-2 hover:bg-primary/10 hover:text-primary hover:border-primary transition-all duration-300"
                     >
                       <Palette className="w-4 h-4" />
-                      {showColorPalette ? 'Hide Palette' : 'Show Palette'}
+                      {showColorPalette ? 'Hide' : 'Show'}
                     </Button>
                   </div>
                   
@@ -2153,46 +2176,49 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
 
                 {/* QR Frame Selection */}
                 <div className="space-y-4">
-                  <Label className="text-sm font-medium">QR Frame Style</Label>
+                  <Label className="text-sm font-semibold flex items-center gap-2">
+                    <ImageIcon className="w-4 h-4 text-purple-500" />
+                    QR Frame Style
+                  </Label>
                   <div className="grid grid-cols-3 gap-3">
                     <button
                       onClick={() => setQrFrame('scan-me')}
-                      className={`p-4 border-2 rounded-lg text-center transition-all ${
+                      className={`group p-5 border-2 rounded-2xl text-center transition-all duration-300 hover:scale-105 hover:-translate-y-0.5 ${
                         qrFrame === 'scan-me' 
-                          ? 'border-primary bg-primary/5' 
-                          : 'border-border hover:border-primary/50'
+                          ? 'border-primary bg-gradient-to-br from-primary/10 to-accent/10 shadow-lg' 
+                          : 'border-border hover:border-primary/50 hover:shadow-md bg-card'
                       }`}
                     >
-                      <div className="text-sm font-medium">Scan Me</div>
-                      <div className="text-xs text-muted-foreground mt-1">Classic frame</div>
+                      <div className={`text-sm font-semibold mb-1 ${qrFrame === 'scan-me' ? 'text-primary' : 'text-foreground'}`}>Scan Me</div>
+                      <div className="text-xs text-muted-foreground">Classic</div>
                     </button>
                     <button
                       onClick={() => setQrFrame('rounded')}
-                      className={`p-4 border-2 rounded-lg text-center transition-all ${
+                      className={`group p-5 border-2 rounded-2xl text-center transition-all duration-300 hover:scale-105 hover:-translate-y-0.5 ${
                         qrFrame === 'rounded' 
-                          ? 'border-primary bg-primary/5' 
-                          : 'border-border hover:border-primary/50'
+                          ? 'border-primary bg-gradient-to-br from-primary/10 to-accent/10 shadow-lg' 
+                          : 'border-border hover:border-primary/50 hover:shadow-md bg-card'
                       }`}
                     >
-                      <div className="text-sm font-medium">Rounded</div>
-                      <div className="text-xs text-muted-foreground mt-1">Modern frame</div>
+                      <div className={`text-sm font-semibold mb-1 ${qrFrame === 'rounded' ? 'text-primary' : 'text-foreground'}`}>Rounded</div>
+                      <div className="text-xs text-muted-foreground">Modern</div>
                     </button>
                     <button
                       onClick={() => setQrFrame('custom')}
-                      className={`p-4 border-2 rounded-lg text-center transition-all ${
+                      className={`group p-5 border-2 rounded-2xl text-center transition-all duration-300 hover:scale-105 hover:-translate-y-0.5 ${
                         qrFrame === 'custom' 
-                          ? 'border-primary bg-primary/5' 
-                          : 'border-border hover:border-primary/50'
+                          ? 'border-primary bg-gradient-to-br from-primary/10 to-accent/10 shadow-lg' 
+                          : 'border-border hover:border-primary/50 hover:shadow-md bg-card'
                       }`}
                     >
-                      <div className="text-sm font-medium">Custom</div>
-                      <div className="text-xs text-muted-foreground mt-1">Your own text</div>
+                      <div className={`text-sm font-semibold mb-1 ${qrFrame === 'custom' ? 'text-primary' : 'text-foreground'}`}>Custom</div>
+                      <div className="text-xs text-muted-foreground">Your text</div>
                     </button>
                   </div>
                   
                   {/* Custom Frame Name Input */}
                   {qrFrame === 'custom' && (
-                    <div className="mt-3">
+                    <div className="mt-3 animate-fade-in">
                       <Label htmlFor="custom-frame-name" className="text-sm font-medium">Custom Frame Text</Label>
                       <div className="flex gap-2 mt-2">
                         <Input
@@ -2211,8 +2237,11 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
                 </div>
 
                 {/* QR Code Size Slider */}
-                <div className="space-y-4">
-                  <Label className="text-sm font-medium">QR Code Size: {qrStyle.size}px</Label>
+                <div className="space-y-4 pt-4">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-sm font-semibold">QR Code Size</Label>
+                    <span className="text-sm font-bold text-primary">{qrStyle.size}px</span>
+                  </div>
                   <Slider
                     value={[qrStyle.size]}
                     onValueChange={(value) => setQrStyle({ ...qrStyle, size: value[0] })}
@@ -2222,8 +2251,8 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
                     className="w-full"
                   />
                   <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>Small (100px)</span>
-                    <span>Large (360px)</span>
+                    <span>📱 Small</span>
+                    <span>🖼️ Large</span>
                   </div>
                 </div>
 
@@ -2250,30 +2279,31 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
 
           {/* QR Preview and Actions */}
           <div className="space-y-6" ref={qrCodeRef}>
-            <Card className="card-elevated animate-slide-in-right">
+            <Card className="card-elevated shadow-2xl border-border/50 hover:shadow-3xl transition-all duration-300 animate-slide-in-right bg-card/95 backdrop-blur">
               <div className="space-y-6 text-center">
-                <div>
-                  <h3 className="text-lg font-semibold mb-2 flex items-center justify-center gap-2">
-                    QR Code Preview
-                    {hasPassword && <Lock className="w-4 h-4 text-primary" />}
-                  </h3>
+                <div className="pb-4 border-b border-border/30">
+                  <div className="flex items-center justify-center gap-2 mb-2">
+                    <QrCode className="w-5 h-5 text-primary" />
+                    <h3 className="text-xl font-bold">QR Code Preview</h3>
+                    {hasPassword && <Lock className="w-5 h-5 text-primary animate-pulse" />}
+                  </div>
                   <p className="text-sm text-muted-foreground">
-                    {hasPassword ? "Password protected QR code" : "This is how your QR code will look"}
+                    {hasPassword ? "🔒 Password protected QR code" : "Preview your stunning QR code"}
                   </p>
                 </div>
 
-                <div className="flex justify-center">
+                <div className="flex justify-center p-6">
                   <div 
                     ref={qrRef}
-                    className={`inline-block p-6 rounded-2xl shadow-lg border-2 border-border/20 ${
+                    className={`inline-block p-8 rounded-3xl shadow-2xl border-2 border-border/20 hover:scale-105 transition-all duration-300 ${
                       qrFrame === 'scan-me' ? 'bg-white' : 'bg-white'
                     }`}
                     style={{ backgroundColor: qrStyle.bgColor }}
                   >
                     {qrFrame === 'scan-me' && qrValue && (
-                      <div className="text-center mb-4">
-                        <span className="inline-block px-3 py-1 bg-primary text-white text-sm font-medium rounded-full">
-                          Scan Me
+                      <div className="text-center mb-4 animate-bounce">
+                        <span className="inline-block px-4 py-2 bg-gradient-hero text-white text-sm font-bold rounded-full shadow-lg shadow-primary/30">
+                          📱 Scan Me
                         </span>
                       </div>
                     )}
@@ -2342,41 +2372,41 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
                 </div>
 
                 {qrValue && (
-                  <div className="space-y-4">
+                  <div className="space-y-4 pt-6 border-t border-border/30">
                     <div className="flex flex-wrap gap-2 justify-center">
-                      <Button onClick={copyQRValue} variant="outline" size="sm" className="gap-2">
+                      <Button onClick={copyQRValue} variant="outline" size="sm" className="gap-2 hover:bg-primary/10 hover:text-primary hover:border-primary transition-all duration-300">
                         <Copy className="w-4 h-4" />
                         Copy Content
                       </Button>
-                      <Button onClick={shareQR} variant="outline" size="sm" className="gap-2">
+                      <Button onClick={shareQR} variant="outline" size="sm" className="gap-2 hover:bg-accent/10 hover:text-accent hover:border-accent transition-all duration-300">
                         <Share2 className="w-4 h-4" />
                         Share
                       </Button>
                     </div>
 
-                    <div className="flex flex-wrap gap-2 justify-center">
+                    <div className="flex flex-wrap gap-3 justify-center">
                       <Button 
                         onClick={() => downloadQR('png')} 
-                        className="gap-2 btn-primary"
+                        className="gap-2 bg-gradient-hero hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5 transition-all duration-300 px-6 py-5 text-base font-semibold"
                         disabled={isGenerating}
                       >
                         {isGenerating ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <Loader2 className="w-5 h-5 animate-spin" />
                         ) : (
-                          <Download className="w-4 h-4" />
+                          <Download className="w-5 h-5" />
                         )}
                         Download PNG
                       </Button>
                       <Button 
                         onClick={() => downloadQR('svg')} 
                         variant="outline" 
-                        className="gap-2"
+                        className="gap-2 hover:bg-gradient-hero hover:text-white hover:border-primary transition-all duration-300 px-6 py-5 text-base font-semibold"
                         disabled={isGenerating}
                       >
                         {isGenerating ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <Loader2 className="w-5 h-5 animate-spin" />
                         ) : (
-                          <Download className="w-4 h-4" />
+                          <Download className="w-5 h-5" />
                         )}
                         Download SVG
                       </Button>
@@ -2387,16 +2417,17 @@ const QrGenerator = ({ onBack }: QrGeneratorProps) => {
             </Card>
 
             {/* Info section */}
-            <Card className="card-premium">
-              <div className="text-center space-y-4">
-                <div className="w-16 h-16 bg-gradient-to-r from-primary to-accent rounded-2xl flex items-center justify-center mx-auto">
-                  <Sparkles className="w-8 h-8 text-white" />
+            <Card className="card-elevated shadow-2xl bg-gradient-to-br from-primary/5 via-accent/5 to-primary/5 border-primary/20 overflow-hidden relative">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-accent/10 opacity-50"></div>
+              <div className="text-center space-y-5 relative z-10">
+                <div className="w-20 h-20 bg-gradient-hero rounded-3xl flex items-center justify-center mx-auto shadow-2xl shadow-primary/30 animate-pulse">
+                  <Sparkles className="w-10 h-10 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold mb-2">Create your QR codes today!</h3>
-                  <p className="text-sm text-muted-foreground">
-                    We offer high-resolution QR codes that look great in a variety of mediums. 
-                    Save your codes in several popular file formats and print or edit them anytime.
+                  <h3 className="text-xl font-bold mb-3 bg-gradient-hero bg-clip-text text-transparent">Create stunning QR codes today!</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed max-w-md mx-auto">
+                    Generate high-resolution, professional QR codes that look amazing anywhere. 
+                    Download in multiple formats and customize to match your brand perfectly.
                   </p>
                 </div>
               </div>
