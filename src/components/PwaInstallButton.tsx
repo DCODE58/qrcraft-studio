@@ -59,7 +59,7 @@ const PwaInstallButton = () => {
     
     if (outcome === 'accepted') {
       toast({
-        title: "🎉 Installing...",
+        title: " Installing...",
         description: "Qr Studio is being installed on your device.",
         className: "border-green-200 bg-green-50 text-green-900",
       });
