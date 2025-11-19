@@ -24,7 +24,7 @@ const PwaInstallButton = () => {
       setIsVisible(false);
       setDeferredPrompt(null);
       toast({
-        title: "App Installed! 🎉",
+        title: "App Installed! Bravo",
         description: "Qr Studio has been installed on your device.",
         className: "bg-gradient-to-r from-green-50 to-emerald-50 border-green-200",
       });
@@ -46,7 +46,7 @@ const PwaInstallButton = () => {
     if (!deferredPrompt) {
       // Show fallback instructions for manual installation
       toast({
-        title: "📱 Install Qr Studio",
+        title: " Install Qr Studio",
         description: "On mobile: Tap the share button and 'Add to Home Screen'. On desktop: Look for the install button in your address bar.",
         className: "border-blue-200 bg-blue-50 text-blue-900",
         duration: 6000,
